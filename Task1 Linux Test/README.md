@@ -63,21 +63,8 @@ size file1.o file2.o my_program
 ![image](https://github.com/user-attachments/assets/2a6823be-75d1-48f6-8cdb-afbe5d9ee2f9)
 
 
-## Step 4: Generate Compilation Stage Files
 
-Use a single command to compile a C file and generate all intermediate files (.i, .s, .o) as well as the executable.
-
-### Commands:
-
-```bash
-
-gcc -save-temps -c file1.c
-
-gcc -save-temps -c file2.c
-
-```
-
-## Step 5: Format and Display Section Sizes
+## Step 4: Format and Display Section Sizes
 
 Print the sizes of .text and .data sections for both object files and the executable in a specific format.
 
