@@ -7,9 +7,6 @@ This README provides instructions for compiling and analyzing a C program consis
 ### Files:
 
 - file1.c: Contains a function and one or more global variables used in this function.
-
-- file1.h: Header file for file1.c.
-
 - file2.c: Contains the main function and uses the function defined in file1.c.
 
 ### Compilation Command:
@@ -19,6 +16,8 @@ This README provides instructions for compiling and analyzing a C program consis
 gcc -static -o my_program file1.c file2.c
 
 ```
+![image](https://github.com/user-attachments/assets/ecfd39c1-2a5d-47e6-968c-5afb6aeacc5d)
+
 
 ## Task 2: Analyze Symbol Tables
 
