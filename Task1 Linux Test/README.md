@@ -27,19 +27,19 @@ If no options are provided, the program defaults to displaying the ELF header.
 
 ### ELF Header and Section Headers
 
-![ELF Header and Section Headers](https://raw.githubusercontent.com/yourusername/elf-parser/main/images/elf_parser_output_1.png)
+![Section_elf_header](https://github.com/user-attachments/assets/bba26cc2-2300-4123-835e-50d3b8525a07)
 
 This image shows the output of running `./elf_parser -s -h file2.o`, which displays both the ELF header and section headers.
 
 ### Section Headers Only
 
-![Section Headers Only](https://raw.githubusercontent.com/yourusername/elf-parser/main/images/elf_parser_output_2.png)
+![Section_Header](https://github.com/user-attachments/assets/4a06ae5e-45dc-49f3-a748-a4c04724f19d)
 
 This image demonstrates the output when running `./elf_parser -s file2.o`, focusing solely on the section headers.
 
 ### Compilation and Various Usage Examples
 
-![Compilation and Usage Examples](https://raw.githubusercontent.com/yourusername/elf-parser/main/images/elf_parser_usage.png)
+![ELF_Header_Bugs_Managment](https://github.com/user-attachments/assets/7ab5e627-db2b-472e-a56d-b6c62cd162fb)
 
 This image showcases the compilation process and various usage examples of the ELF Parser tool.
 
