@@ -82,4 +82,9 @@ echo -n "exec) "; size my_program | tail -n 1 | awk '{printf "text: %d, data: %d
 
 ![image](https://github.com/user-attachments/assets/d4d0d090-bfcc-48ce-8f29-d08dc8a3dece)
 
-
+- echo -n "file1) " prints the label file1) without a newline.
+- size file1.o outputs the sizes of the sections.
+- | pipes the output of the size command to the tail command.
+- tail -n 1 extracts the last line of the size output.
+- | pipes the output of tail to the awk command.
+- awk '{printf "text: %d, data: %d\n", $1, $2}' formats and prints the text and data sizes in the desired format.
