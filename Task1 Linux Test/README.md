@@ -6,7 +6,6 @@ ELF Parser is a command-line tool designed to analyze and display information ab
 
 - Display ELF header information
 - Show section headers and their details
-- Support for both 32-bit and 64-bit ELF files
 - Command-line options for customized output
 - Can deal with most possible bugs
 
