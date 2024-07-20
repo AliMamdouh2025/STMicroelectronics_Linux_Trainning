@@ -60,6 +60,9 @@ size file1.o file2.o my_program
 
 ```
 
+![image](https://github.com/user-attachments/assets/2a6823be-75d1-48f6-8cdb-afbe5d9ee2f9)
+
+
 ## Step 4: Generate Compilation Stage Files
 
 Use a single command to compile a C file and generate all intermediate files (.i, .s, .o) as well as the executable.
