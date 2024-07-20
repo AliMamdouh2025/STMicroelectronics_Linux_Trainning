@@ -85,13 +85,12 @@ Print the sizes of .text and .data sections for both object files and the execut
 
 ```bash
 
-size file1.o file2.o Session2_Task1 | awk '
-
-NR==2 {print "file1) text: " $1 ", data: " $2}
-
-NR==3 {print "file2) text: " $1 ", data: " $2}
-
-NR==4 {print "exec)  text: " $1 ", data: " $2}'
+echo -n "file1) "; size file1.o | tail -n 1 | awk '{printf "text: %d, data: %d\n", $1, $2}'
+echo -n "file2) "; size file2.o | tail -n 1 | awk '{printf "text: %d, data: %d\n", $1, $2}'
+echo -n "exec) "; size my_program | tail -n 1 | awk '{printf "text: %d, data: %d\n", $1, $2}'
 
 ```
+
+![image](https://github.com/user-attachments/assets/d4d0d090-bfcc-48ce-8f29-d08dc8a3dece)
+
 
