@@ -1,6 +1,8 @@
-![image](https://github.com/user-attachments/assets/693c10f7-7cbc-44ab-830b-24ed8d51adb5)# C Program Compilation and Analysis
+ # C Program Compilation and Analysis
+ This README provides instructions for compiling and analyzing a C program consisting of two files, along with various commands to examine the compilation process and output.
 
-This README provides instructions for compiling and analyzing a C program consisting of two files, along with various commands to examine the compilation process and output.
+![image](https://github.com/user-attachments/assets/693c10f7-7cbc-44ab-830b-24ed8d51adb5)
+
 
 ## Step 1: Create and Compile C Program
 
