@@ -94,7 +94,6 @@ int main() // This code to take the arguments and command but not from the 'main
 	// A boolean flag to control the main loop of the shell. Initially set to false, indicating that the shell should continue running.
 	bool should_exit = false;
 
-	// Initialize readline
 	// This function tells the Readline library to bind the tab key to the rl_insert function.
 	// When the tab key is pressed, instead of performing its default action (like auto-completion), the Readline library will call the rl_insert function.
 	// The rl_insert function's role is to simply insert the tab character (\t) into the input buffer at the current cursor position.
