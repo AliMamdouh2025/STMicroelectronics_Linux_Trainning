@@ -78,6 +78,8 @@ void cmd_pwd(void)
 
 
 
+
+
 /**
  * Print the given arguments to the standard output.
  *
@@ -88,6 +90,8 @@ void cmd_echo(char *args)
 	// Print the provided arguments followed by a newline
 	printf("%s\n", args);
 }
+
+
 
 
 
@@ -206,6 +210,8 @@ void cmd_cp(char *args)
 
 
 
+
+
 /**
  * Move or rename a file from a source path to a destination path.
  *  
@@ -285,6 +291,8 @@ void cmd_mv(char *args)
 
 
 
+
+
 /**
  * Display a help message listing all supported commands.
  *
@@ -311,6 +319,8 @@ void cmd_help(void)
 	printf("5- exit : terminate the shell\n");
 	printf("6- help : print all supported commands with brief info\n");
 }
+
+
 
 
 
