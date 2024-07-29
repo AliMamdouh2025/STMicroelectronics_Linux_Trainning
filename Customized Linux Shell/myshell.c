@@ -1,12 +1,16 @@
 /**
- *==================================================================================
- * @file           : myshell.c
+ *===================================================================================
+ * @file           : commands.c
  * @author         : Ali Mamdouh
- * @brief          : Simple shell of linux that can takes commands from user
- *==================================================================================
+ * @brief          : Impelementation of commands to be executed bu customized shell
+ * @Reviwer        : Eng Kareem
+ * @Version        : 1.1.0
+ * @Company        : STMicroelectronics
+ *===================================================================================
  * 
- *==================================================================================
+ *===================================================================================
  */
+
 
 
 
@@ -22,7 +26,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "commands.h"
-
+#include <stdbool.h>
 
 
 /*============================================================================
@@ -30,6 +34,15 @@
  ============================================================================*/
 #define MAX_INPUT                               1024
 #define PROMPT                                  "AliMamdouhShell > "
+
+
+
+
+/*============================================================================
+ ********************************  Macros  ***********************************
+ ============================================================================*/
+#define INCREMENT_POINTER_BY_1                  1
+
 
 
 
@@ -51,7 +64,7 @@
  * @param str: Pointer to the input string (char*). This is the string that will be trimmed
  *             of leading and trailing whitespace characters. The string must be null-terminated.
  */
-void RemoveWhitespaces(char *str) 
+void Remove_Leading_Trailing_Whitespaces(char *str) 
 {
 	// If the input string is NULL, there is nothing to process, so return immediately.
 	if (str == NULL) return;
@@ -76,6 +89,15 @@ void RemoveWhitespaces(char *str)
 	// This effectively removes the trailing whitespace.
 	end[1] = '\0';
 }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -111,9 +133,11 @@ int main() // This code to take the arguments and command but not from the 'main
 			printf("\n");
 			break;
 		}
-
+               
 		// Calls the RemoveWhitespaces function to trim leading and trailing whitespace from the input string.   
-		RemoveWhitespaces(input);
+		Remove_Leading_Trailing_Whitespaces(input);
+
+		
 
 		// Checks if the length of the input string is 0 after trimming. 
 		// If the input is empty (i.e., it contained only whitespace), it proceeds to free the allocated memory and igmore this iteration.
@@ -132,6 +156,11 @@ int main() // This code to take the arguments and command but not from the 'main
 		// Continues tokenizing the string as we pass NULL in the first arguments
 		// Delimiter: "\n" means it will take everything until it finds "\n"
 		args = strtok(NULL, "\n");
+                
+                //Filter Quters of Argument if they exists
+                args = extract_quoted_arg(args);
+
+ 
 
 		// Checks if cmd is NULL, which could happen if the input string was empty or contained only spaces, Then ignore this iteration.
 		if (cmd == NULL) 
