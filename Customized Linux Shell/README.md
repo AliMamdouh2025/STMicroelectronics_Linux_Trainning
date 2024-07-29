@@ -132,7 +132,15 @@ The shell includes robust error handling for various scenarios like:
 - Non-existent files or directories
 - Missing command arguments
 - Attempts to overwrite existing files without proper flags
+- Can handle directories which contain spaces in its names
+- Filter quutions of the echo to be exactly like echo shell system Response
 
 Example:
 
 ![Error Handling](https://github.com/user-attachments/assets/1c551207-2644-432f-a15e-7262008d1fad)
+
+![Error Handling2](https://github.com/user-attachments/assets/fa2eb207-c792-4769-8472-128f770b73d7)
+
+![Error Handling3](https://github.com/user-attachments/assets/e54274ec-8a3e-46a2-93f8-f01c728340bb)
+
+
