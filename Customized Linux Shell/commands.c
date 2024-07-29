@@ -4,13 +4,12 @@
  * @author         : Ali Mamdouh
  * @brief          : Impelementation of commands to be executed bu customized shell
  * @Reviwer        : Eng Kareem
- * @Version        : 1.0.0
+ * @Version        : 1.1.0
  * @Company        : STMicroelectronics
  *===================================================================================
  * 
  *===================================================================================
  */
-
 
 
 /*============================================================================
@@ -26,7 +25,8 @@
 #include <libgen.h>
 #include <getopt.h>
 #include "commands.h"
-
+#include <stdbool.h>
+#include <ctype.h>
 
 
 /*============================================================================
@@ -36,8 +36,6 @@
 #define BUFFER_SIZE                  4096
 
 
-
-
 /*============================================================================
  ********************************  Macros  ***********************************
  ============================================================================*/
@@ -45,13 +43,132 @@
 #define SUCCESS_OPERATION             0
 #define FAILED_OPERATION             -1
 #define FILE_NOT_EXIST               -1
-
-
+#define INCREMENT_POINTER_BY_1        1
+#define ON                            1
+#define OFF                           0
 
 
 /*============================================================================
- **************************  Functions Definitions  **************************
+ ***********************  Functions Helper Definitions  **********************
  ============================================================================*/
+  
+/**
+ * This Function Splits a string of Paths into two strings of Paths, The Split begin from the first space-
+ * where the first  Path is before the space and second Path is after the space.
+ * 
+ * It is a must that the first Path contains at its end file extension or this function will not work.
+ *
+ * It is a must to pass refrence of a pointer to the the twe pointers to pointers, So that the orginal two pointers changed-
+ * by refrence and point to the new memory allocated
+ */ 
+ void tokenize_Paths(const char *MainArgument, char **FirstPath, char **SecondPath) 
+ {
+    // Allocate memory for B and C
+    // We add this one as if no split happens and there is a strcat() occur inside below loop it will exceed size of MainArgument by one byte.
+    *FirstPath = (char *)malloc(strlen(MainArgument) + 1); 
+    *SecondPath = (char *)malloc(strlen(MainArgument) + 1);
+    
+    // Make sure memory is allocated correctly
+    if (*FirstPath == NULL || *SecondPath == NULL) 
+    {
+        fprintf(stderr, "Memory allocation failed\n");
+        return;
+    }
+    
+    // Initialize FirstPath and SecondPath
+    (*FirstPath)[0] = '\0';
+    (*SecondPath)[0] = '\0';
+    
+    // Tokenize the string based on spaces
+    // Tokenize from a copy of MainArgument
+    const char *delimiter = " ";
+    char *needlePointer = NULL;
+    char *token = strtok(strdup(MainArgument), delimiter); 
+    
+    // flag that remains true until first Path is constructed correctly
+    int is_part_of_FirstPath = ON;
+    
+
+    // Loop on the full Path until iterating on all its elements(token == NULL)
+    while (token != NULL) 
+    {
+        if (is_part_of_FirstPath) 
+        {
+            //Construct first path to the first half od original Path message
+            strcat(*FirstPath, token);
+            strcat(*FirstPath, " ");
+            
+            //return NULL if not found '.' and return a pointer points to '.' location if found.
+            //strstr search for string and return a pointer to it, you may also use strchr
+            needlePointer = strstr(token, ".");  
+    
+            //Check if first path contains extension of a file.               
+            if ((needlePointer != NULL) && isalpha(*(needlePointer + 1)) && *(needlePointer + 2) == '\0')
+            {
+                is_part_of_FirstPath = OFF;
+            }
+        } else 
+        {
+            strcat(*SecondPath, token);
+            strcat(*SecondPath, " ");
+        }
+        
+        // Tokenize the next part of main argument
+        token = strtok(NULL, delimiter);
+    }
+    
+    // Remove trailing spaces
+    (*FirstPath)[strlen(*FirstPath) - 1] = '\0';
+    (*SecondPath)[strlen(*SecondPath) - 1] = '\0';
+}
+
+
+
+ 
+ 
+ 
+
+ 
+/** Add this function to handle quoted argument
+ * 
+ * This Function Filter Qutions of only One String(Ended With NULL Termination)
+ *
+ * If there are more than one argument in quoted String, You must seperate each argument in-
+ * a seperated String then enter each String to this function to filter Qutions.
+ *
+ * For Exmaple this is one string: "/home/ali/Work Space STM Test/file1_WorkSpace.c"  "/home/ali/Task2_STM",-
+ * You must seperate each of the two arguments in a seperate Strings then Pass each String to this function to filter quotions
+ */
+char* extract_quoted_arg(char* input) 
+{
+    if(input == NULL) return NULL;
+    
+    char* start = input;
+    char* end;
+
+    // Check if the first character is a quote
+    if (*start == '"') 
+    {
+        start++;  // Move past the opening quote
+        end = strchr(start, '"');
+        if (end) 
+        {
+            *end = '\0';  // Terminate the string at the closing quote  
+            strcat(start, (end + INCREMENT_POINTER_BY_1)); // Concatenate second half of string to its first half
+            return start;
+        }
+
+    }
+    
+    // If the input doesn't start with a quote, return the whole input
+    return input;
+}
+ 
+ 
+/*============================================================================
+ **********************  Functions Commands Definitions  *********************
+ ============================================================================*/
+
 /**
  * Print the current working directory (CWD).
  *   
@@ -83,6 +200,9 @@ void cmd_pwd(void)
 
 
 
+
+
+
 /**
  * Print the given arguments to the standard output.
  *
@@ -93,6 +213,11 @@ void cmd_echo(char *args)
 	// Print the provided arguments followed by a newline
 	printf("%s\n", args);
 }
+
+
+
+
+
 
 
 
@@ -118,9 +243,22 @@ void cmd_echo(char *args)
 void cmd_cp(char *args) 
 {
     // Tokenize the arguments to extract source, destination, and optional flag
-    char *source = strtok(args, " ");
-    char *dest = strtok(NULL, " ");
-    char *option = strtok(NULL, " ");
+    char *source = NULL;
+    char *dest = NULL;
+    char *option = NULL;
+        
+    //Takes first argumuent in source, and second argument & option(if exists) to dest
+    tokenize_Paths(args, &source, &dest);
+    
+    //Takes from Second Argument in dest and the option(if exists) in option pointer
+    dest = strtok(dest, " ");
+    option = strtok(NULL, " ");
+    
+    //Filter the Source, option and destination Paths from "Quotes"
+    source = extract_quoted_arg(source);
+    dest = extract_quoted_arg(dest);
+    option = extract_quoted_arg(option);        
+    
     
     // Initializes a boolean variable append to false. 
     bool append = false;
@@ -215,6 +353,11 @@ void cmd_cp(char *args)
 
 
 
+
+
+
+
+
 /**
  * Move or rename a file from a source path to a destination path.
  *  
@@ -229,14 +372,22 @@ void cmd_cp(char *args)
  */
 void cmd_mv(char *args) 
 {
-    // Extract the source file path from the arguments
-    char *source = strtok(args, " ");
+    // Tokenize the arguments to extract source, destination, and optional flag
+    char *source = NULL;
+    char *dest = NULL;
+    char *option = NULL;
     
-    // Extract the destination path from the arguments
-    char *dest = strtok(NULL, " ");
+    //Takes first argumuent in source, and second argument & option(if exists) to dest
+    tokenize_Paths(args, &source, &dest);
     
-    // Extract the optional flag or any additional arguments
-    char *option = strtok(NULL, " ");
+    //Takes from Second Argument in dest and the option(if exists) in option pointer
+    dest = strtok(dest, " ");
+    option = strtok(NULL, " ");
+    
+    //Filter the Source, option and destination Paths from "Quotes"
+    source = extract_quoted_arg(source);
+    dest = extract_quoted_arg(dest);
+    option = extract_quoted_arg(option);        
     
     // Boolean flag to determine whether to forcefully overwrite an existing destination file
     bool force = false;
@@ -296,6 +447,11 @@ void cmd_mv(char *args)
 
 
 
+
+
+
+
+
 /**
  * Display a help message listing all supported commands.
  *
@@ -328,6 +484,10 @@ void cmd_help(void)
 
 
 
+
+
+
+
 /**
  * Terminate the shell session.
  *  
@@ -340,3 +500,10 @@ bool cmd_exit(void)
 	printf("Good Bye :)\n");
 	return true; 
 }
+
+
+
+
+
+
+ // printf("Inside Function DestFile: %s\n", dest);  ////////////////////////////////////////////////////////////////////////////// Debug print
