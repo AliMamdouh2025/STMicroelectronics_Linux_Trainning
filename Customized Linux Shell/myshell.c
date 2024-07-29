@@ -14,7 +14,6 @@
 
 
 
-
 /*============================================================================
  ******************************  Includes  ***********************************
  ============================================================================*/
@@ -27,6 +26,7 @@
 #include <readline/history.h>
 #include "commands.h"
 #include <stdbool.h>
+
 
 
 /*============================================================================
@@ -42,7 +42,6 @@
  ********************************  Macros  ***********************************
  ============================================================================*/
 #define INCREMENT_POINTER_BY_1                  1
-
 
 
 
@@ -157,7 +156,7 @@ int main() // This code to take the arguments and command but not from the 'main
 		// Delimiter: "\n" means it will take everything until it finds "\n"
 		args = strtok(NULL, "\n");
                 
-                //Filter Quters of Argument if they exists
+                //Filter Quotions of Argument if they exists
                 args = extract_quoted_arg(args);
 
  
