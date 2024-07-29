@@ -138,9 +138,10 @@ The shell includes robust error handling for various scenarios like:
 Example:
 
 ![Error Handling](https://github.com/user-attachments/assets/1c551207-2644-432f-a15e-7262008d1fad)
+Diffrent Errors Handling
 
 ![Error Handling2](https://github.com/user-attachments/assets/fa2eb207-c792-4769-8472-128f770b73d7)
+Showing Echo quotes filtering, and the file before enetring directory containning space in its name.
 
 ![Error Handling3](https://github.com/user-attachments/assets/e54274ec-8a3e-46a2-93f8-f01c728340bb)
-
-
+Showing the file after enetring directory containning space in its name and the program handle error correctly.
