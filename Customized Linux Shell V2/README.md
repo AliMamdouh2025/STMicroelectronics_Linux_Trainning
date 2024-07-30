@@ -94,7 +94,7 @@ After compilation, start the shell with:
 
 The shell supports executing external commands available in the system's PATH:
 
-```bash
+```
 AliMamdouhShell > ls
  commands.c   DebugOfTsk2      file2_WorkSpace.c   myshell.c                'strtok()_test_experiments.c'  'Task3 Version 1'
  commands.h   file1_WorkSpace.c   myshell         'Pictures for ReadMe'  'Task2 Version1'
@@ -104,7 +104,7 @@ AliMamdouhShell > ls
 
 The shell provides error messages for unrecognized commands or execution failures:
 
-```bash
+```
 AliMamdouhShell > nonexistentcommand
 execvp error for nonexistentcommand: No such file or directory
 ```
