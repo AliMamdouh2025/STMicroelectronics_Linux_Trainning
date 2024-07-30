@@ -1,4 +1,3 @@
-Here's an improved version of the README file with a more professional tone and structure:
 
 ```markdown
 # Custom Shell Implementation
