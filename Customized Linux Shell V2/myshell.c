@@ -127,6 +127,8 @@ void Remove_Leading_Trailing_Whitespaces(char *str)
  */
 void Execute_External_Command(char *cmd, char *args, char *input)
 {
+	if(cmd == NULL || args == NULL || input == NULL) perror("Wrong Arguments!!");
+	
 	pid_t pid;
 	char **argv = NULL;
 	int argc = 0;
