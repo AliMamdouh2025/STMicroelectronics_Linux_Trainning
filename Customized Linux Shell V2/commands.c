@@ -2,7 +2,7 @@
  *===================================================================================
  * @file           : commands.c
  * @author         : Ali Mamdouh
- * @brief          : Impelementation of commands to be executed bu customized shell
+ * @brief          : Impelementation of commands to be executed by customized shell
  * @Reviwer        : Eng Kareem
  * @Version        : 2.0.0
  * @Company        : STMicroelectronics
