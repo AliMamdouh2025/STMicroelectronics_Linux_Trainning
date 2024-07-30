@@ -188,10 +188,13 @@ void Execute_External_Command(char *cmd, char *args, char *input)
 
 		// If execvp returns, it must have failed
 		fprintf(stderr, "execvp error for %s: %s\n", cmd, strerror(errno));
+		free(argv);
 		exit(EXIT_FAILURE);
 	} else 
 	{
 		// Parent process
+		//Setting waitpid(, , 0) means that waitpid behaves in a blocking manner-
+		// meaning it will wait until the specified child process terminates.
 		if (waitpid(pid, &status, 0) == WAIT_PID_FAILED) 
 		{
 			perror("waitpid failed");
