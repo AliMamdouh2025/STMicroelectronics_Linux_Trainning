@@ -56,7 +56,7 @@ extern int process_history_count;
  ***********************  Functions Helper Definitions  **********************
  ============================================================================*/
 char* extract_quoted_arg(char* input);
-void tokenize_string(const char *A, char **B, char **C);
+void tokenize_Paths(const char *MainArgument, char **FirstPath, char **SecondPath); 
 
 
 
