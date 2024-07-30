@@ -197,21 +197,23 @@ void Execute_External_Command(char *cmd, char *args, char *input)
 			return;
 		}
 
-        //Checks if the child process terminated normally (i.e., it called exit() or returned from main()).
+                 // Checks if the child process terminated normally-
+                // (i.e., it called exit() or returned from main()).
 		if (WIFEXITED(status)) 
 		{
-			// WEXITSTATUS(status): Extracts the exit status code of the child process. 
+			 // WEXITSTATUS(status): Extracts the exit status code of the child process. 
 			// This is the value passed to exit() by the child process.
 			add_to_process_history(input, WEXITSTATUS(status));
 
-          // Checks if the child process was terminated by a signal (e.g., SIGKILL or SIGSEGV).
+                   // Checks if the child process was terminated by a signal-
+                  // (e.g., SIGKILL or SIGSEGV).
 		} else if (WIFSIGNALED(status)) 
 		{
-			// WTERMSIG(status): Extracts the signal number that caused the child process to terminate.
-            // This provides information about why the child process was killed.
+			 // WTERMSIG(status): Extracts the signal number that caused the child process to terminate.
+                        // This provides information about why the child process was killed.
 			fprintf(stderr, "Child process terminated by signal %d\n", WTERMSIG(status));
 			
-			// Records the command and the signal number that terminated the child process in the process history. 
+	          	 // Records the command and the signal number that terminated the child process in the process history. 
 			// The negative sign (-WTERMSIG(status)) indicates that the process was killed by a signal, rather than exiting normally.
 			add_to_process_history(input, -WTERMSIG(status));
 		}
