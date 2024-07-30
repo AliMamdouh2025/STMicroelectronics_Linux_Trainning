@@ -1,6 +1,4 @@
-
-```markdown
-# Custom Shell Implementation
+# Custom Shell Implementation Version 2
 
 This project provides a custom shell that includes built-in commands and the capability to execute external commands.
 
@@ -8,13 +6,13 @@ This project provides a custom shell that includes built-in commands and the cap
 
 To compile the custom shell, use the following command:
 
-```bash
+```
 gcc -o myshell myshell.c commands.c -lreadline
 ```
 
 Ensure that the `readline` library is installed on your system. On Ubuntu or Debian-based systems, you can install it with:
 
-```bash
+```
 sudo apt-get install libreadline-dev
 ```
 
