@@ -66,10 +66,16 @@ After compilation, start the shell with:
    ```
    AliMamdouhShell > mytype mycd
    mycd is a shell built-in
+   AliMamdouhShell > mytype ls
+   ls is an external command
+   AliMamdouhShell > which ls
+   /usr/bin/ls
    AliMamdouhShell > mytype /usr/bin/ls
    /usr/bin/ls is an external command
+   AliMamdouhShell > mytype sads
+   sads is not recognized as an internal or external command
    ```
-![image_2024-07-30_08-47-20](https://github.com/user-attachments/assets/8faf7c9e-1400-4264-8de8-ff58209a8b61)
+![mytypeCornerCases](https://github.com/user-attachments/assets/39cfdd0e-82b6-46cd-aa01-ae6088453dc2)
 
 
 5. **myenvir**: Displays environment variables.
