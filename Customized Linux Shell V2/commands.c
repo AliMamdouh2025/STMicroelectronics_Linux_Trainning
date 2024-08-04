@@ -288,29 +288,113 @@ void cmd_cd(char *path)
  *
  * @param command: Pointer to the command string (char*). This is the command to be checked.
  */
+/**
+ * Determine if a command is a shell built-in or an external command.
+ *
+ * This function checks if the specified command is a shell built-in command or an external command.
+ * It prints a message indicating the type of the command.
+ *
+ * If the command is not a recognized built-in command and is not found in the system PATH,
+ * a message stating that the command is not recognized is printed.
+ *
+ *
+ * @param command: Pointer to the command string (char*).
+ */
 void cmd_type(char *command) 
 {
-	if (command == NULL) 
-	{
-		fprintf(stderr, "Usage: type <command>\n");
-		return;
-	}
-	// Check if it's a built-in command
-	if (strcmp(command, "mycp") == 0 || strcmp(command, "mymv") == 0 ||
-			strcmp(command, "mypwd") == 0 || strcmp(command, "myecho") == 0 ||
-			strcmp(command, "myhelp") == 0 || strcmp(command, "myexit") == 0 ||
-			strcmp(command, "mycd") == 0 || strcmp(command, "mytype") == 0 ||
-			strcmp(command, "myenvir") == 0 || strcmp(command, "myphist") == 0) {
-		printf("%s is a shell built-in\n", command);
-	} else if (access(command, X_OK) == 0) 
-	{
-		printf("%s is an external command\n", command);
-	} else 
-	{
-		printf("%s is not a recognized command\n", command);
-	}
-}
+    // Check if the provided command is NULL
+    if (command == NULL) 
+    {
+        // Print usage information to standard error if no command is provided
+        fprintf(stderr, "Usage: type <command>\n");  
+              
+        // Return from the function as there's nothing to process
+        return;
+    }
+    
 
+    // Check if the command matches any predefined shell built-in commands
+    if (strcmp(command, "mycp") == 0 || strcmp(command, "mymv") == 0 ||
+        strcmp(command, "mypwd") == 0 || strcmp(command, "myecho") == 0 ||
+        strcmp(command, "myhelp") == 0 || strcmp(command, "myexit") == 0 ||
+        strcmp(command, "mycd") == 0 || strcmp(command, "mytype") == 0 ||
+        strcmp(command, "myenvir") == 0 || strcmp(command, "myphist") == 0) 
+    {
+        // If the command is a shell built-in, print this information
+        printf("%s is a shell built-in\n", command);        
+        
+        // Return from the function as the command type is determined
+        return;
+    }
+    
+
+    // Retrieve the PATH environment variable which contains directories to search for external commands
+    char *path = getenv("PATH");
+    
+    // Check if the PATH environment variable is not set
+    if (path == NULL) 
+    {
+        // Print an error message if PATH is not set
+        fprintf(stderr, "Error: PATH environment variable not set\n");
+        
+        // Return from the function as we cannot proceed without PATH
+        return;
+    }
+    
+
+    // Create a duplicate of the PATH string to avoid modifying the original PATH
+    char *path_copy = strdup(path);
+    
+    
+    // Tokenize the duplicated PATH string using colon as the delimiter to get each directory
+    char *dir = strtok(path_copy, ":");
+    
+
+    // Iterate over each directory in the PATH
+    while (dir != NULL) 
+    {
+        // Create a buffer to store the full path of the command
+        char full_path[MAX_PATH];
+        
+        // Construct the full path by combining the directory and the command
+        snprintf(full_path, sizeof(full_path), "%s/%s", dir, command);
+
+        // Check if the constructed full path is an executable file
+        // X_OK is the mode used to check if the file specified by full_path has execute permissions.
+        if (access(full_path, X_OK) == IS_EXECUTABLE) 
+        {
+            // If the command is executable, print this information
+            printf("%s is an external command\n", command);
+            
+            // Free the memory allocated for path_copy
+            free(path_copy);
+            
+            // Return from the function as the command type is determined
+            return;
+        }
+
+        // Move to the next directory in the PATH
+        dir = strtok(NULL, ":");
+    }
+    
+
+    // Free the memory allocated for path_copy after all directories have been checked
+    free(path_copy);
+    
+
+    // Check if the command is executable in the current directory OR-
+    // execute command if user enter full path
+    if (access(command, X_OK) == 0) 
+    {
+        // If the command is executable, print this information
+        printf("%s is an external command\n", command);
+    } 
+    else 
+    {
+        // If the command is not found anywhere, print this information
+        printf("%s is not recognized as an internal or external command\n", command);
+    }
+}
 
 
 
