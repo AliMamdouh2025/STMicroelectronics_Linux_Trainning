@@ -4,9 +4,8 @@
  * @author         : Ali Mamdouh
  * @brief          : Impelementation of commands to be executed bu customized shell
  * @Reviwer        : Eng Kareem
- * @Version        : 2.0.0
+ * @Version        : 2.1.0
  * @Company        : STMicroelectronics
- * @Date           : 30/7/2024 
  *===================================================================================
  * 
  *===================================================================================
@@ -49,9 +48,40 @@
 #define INCREMENT_POINTER_BY_1                  1
 #define STRINGS_ARE_EQUAL                       0
 #define FORK_FAILED                            -1
-#define WAIT_PID_FAILED                        -1
+#define PROCESS_FAILED                         -1
 #define IS_CHILD                                0
 
+
+
+
+/*============================================================================
+ *************************  Data types Declerations  *************************
+ ============================================================================*/
+typedef struct 
+{
+	const char *name;
+	void (*function)(char*);
+} Command;
+
+
+
+
+/*============================================================================
+ **********************  Globaal Variables Definition  ***********************
+ ============================================================================*/
+Command internal_commands[] = 
+{
+		{"mycp", cmd_mycp},
+		{"mymv", cmd_mymv},
+		{"mypwd", (void (*)(char*))cmd_pwd},  // Cast to match function signature
+		{"myecho", cmd_echo},
+		{"myhelp", (void (*)(char*))cmd_help},
+		{"mycd", cmd_cd},
+		{"mytype", cmd_type},
+		{"myenvir", cmd_envir},
+		{"myphist", (void (*)(char*))cmd_phist},
+		{NULL, NULL}  // This is used to mark the end of the array.
+};
 
 
 
@@ -127,7 +157,7 @@ void Remove_Leading_Trailing_Whitespaces(char *str)
  *               along with the exit status in the process history.
  */
 void Execute_External_Command(char *cmd, char *args, char *input)
-{	
+{
 	pid_t pid;
 	char **argv = NULL;
 	int argc = 0;
@@ -187,38 +217,24 @@ void Execute_External_Command(char *cmd, char *args, char *input)
 
 		// If execvp returns, it must have failed
 		fprintf(stderr, "execvp error for %s: %s\n", cmd, strerror(errno));
-		free(argv);
 		exit(EXIT_FAILURE);
 	} else 
 	{
 		// Parent process
-		//Setting waitpid(, , 0) means that waitpid behaves in a blocking manner-
-		// meaning it will wait until the specified child process terminates.
-		if (waitpid(pid, &status, 0) == WAIT_PID_FAILED) 
+		if (waitpid(pid, &status, 0) == PROCESS_FAILED) 
 		{
 			perror("waitpid failed");
 			free(argv);
 			return;
 		}
 
-                 // Checks if the child process terminated normally-
-                // (i.e., it called exit() or returned from main()).
 		if (WIFEXITED(status)) 
 		{
-			 // WEXITSTATUS(status): Extracts the exit status code of the child process. 
-			// This is the value passed to exit() by the child process.
 			add_to_process_history(input, WEXITSTATUS(status));
 
-                   // Checks if the child process was terminated by a signal-
-                  // (e.g., SIGKILL or SIGSEGV).
 		} else if (WIFSIGNALED(status)) 
 		{
-			 // WTERMSIG(status): Extracts the signal number that caused the child process to terminate.
-                        // This provides information about why the child process was killed.
 			fprintf(stderr, "Child process terminated by signal %d\n", WTERMSIG(status));
-			
-	          	 // Records the command and the signal number that terminated the child process in the process history. 
-			// The negative sign (-WTERMSIG(status)) indicates that the process was killed by a signal, rather than exiting normally.
 			add_to_process_history(input, -WTERMSIG(status));
 		}
 	}
@@ -264,9 +280,9 @@ int main()
 			break;
 		}
 
+
 		// Calls the RemoveWhitespaces function to trim leading and trailing whitespace from the input string.   
 		Remove_Leading_Trailing_Whitespaces(input);
-
 
 
 		// Checks if the length of the input string is 0 after trimming. 
@@ -300,56 +316,47 @@ int main()
 		}
 
 
-		/*Select Command*/
-		if (strcmp(cmd, "mycp") == STRINGS_ARE_EQUAL) 
-		{
-			cmd_mycp(args);
+		/* Begin command selection and execution process */
 
-		} else if (strcmp(cmd, "mymv") == STRINGS_ARE_EQUAL) 
+		// Check if the command is "myexit" - this needs special handling
+		if (strcmp(cmd, "myexit") == STRINGS_ARE_EQUAL)
 		{
-			cmd_mymv(args);
-
-		} else if (strcmp(cmd, "mypwd") == STRINGS_ARE_EQUAL) 
-		{
-			cmd_pwd();
-
-		} else if (strcmp(cmd, "myecho") == STRINGS_ARE_EQUAL) 
-		{
-			cmd_echo(args ? args : "");
-
-		} else if (strcmp(cmd, "myhelp") == STRINGS_ARE_EQUAL) 
-		{
-			cmd_help();
-
-		} else if (strcmp(cmd, "myexit") == STRINGS_ARE_EQUAL) 
-		{
+			// If it's the exit command, call cmd_exit() and prepare to end the shell
 			should_exit = cmd_exit();
-
-		} else if (strcmp(cmd, "mycd") == STRINGS_ARE_EQUAL) 
+		}
+		else
 		{
-			cmd_cd(args);
+			// For all other commands, we'll search through our internal commands
+			bool command_found = false;  // Flag to track if we find a matching internal command
 
-		} else if (strcmp(cmd, "mytype") == STRINGS_ARE_EQUAL) 
-		{
-			cmd_type(args);
+			// Loop through the array of internal commands
+			for (int i = 0; internal_commands[i].name != NULL; i++)
+			{
+				// Compare the input command with each internal command
+				if (strcmp(cmd, internal_commands[i].name) == STRINGS_ARE_EQUAL)
+				{
+					// If we find a match, execute the corresponding function
+					internal_commands[i].function(args);
+					command_found = true;  // Set the flag to indicate we found and executed an internal command
+					break;  // Exit the loop since we've found and executed the command
+				}
+			}
 
-		} else if (strcmp(cmd, "myenvir") == STRINGS_ARE_EQUAL) 
-		{
-			cmd_envir(args);
-
-		} else if (strcmp(cmd, "myphist") == STRINGS_ARE_EQUAL) 
-		{
-			cmd_phist();
-
-		} else 
-		{
-			Execute_External_Command(cmd, args, input);
+			// If we didn't find a matching internal command, treat it as an external command
+			if (!command_found)
+			{
+				// Execute the command as an external command
+				Execute_External_Command(cmd, args, input);
+			}
 		}
 
+		// Free the memory allocated for the input string
 		free(input);
+
+		// End of the main command processing loop
 	}
 
-	// Clears the history of commands stored by the readline library
+	// After exiting the main loop, clear the command history
 	rl_clear_history();
 
 	return 0;
