@@ -43,6 +43,7 @@
 #define INCREMENT_POINTER_BY_1        1
 #define ON                            1
 #define OFF                           0
+#define IS_EXECUTABLE                 0
 
 
 
