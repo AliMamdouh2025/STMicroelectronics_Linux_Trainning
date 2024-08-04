@@ -284,19 +284,6 @@ void cmd_cd(char *path)
  * If the command is not a recognized built-in command and is not found in the system PATH,
  * a message stating that the command is not recognized is printed.
  *
- * If enterd non-built in command It is a must to enter its full path or it will not recognize it. 
- *
- * @param command: Pointer to the command string (char*). This is the command to be checked.
- */
-/**
- * Determine if a command is a shell built-in or an external command.
- *
- * This function checks if the specified command is a shell built-in command or an external command.
- * It prints a message indicating the type of the command.
- *
- * If the command is not a recognized built-in command and is not found in the system PATH,
- * a message stating that the command is not recognized is printed.
- *
  *
  * @param command: Pointer to the command string (char*).
  */
@@ -357,7 +344,15 @@ void cmd_type(char *command)
         char full_path[MAX_PATH];
         
         // Construct the full path by combining the directory and the command
-        snprintf(full_path, sizeof(full_path), "%s/%s", dir, command);
+        // Check if constructed Path is too long
+        int ret = snprintf(full_path, sizeof(full_path), "%s/%s", dir, command);
+        
+        // if constructed Path is to long print error
+        if (ret >= sizeof(full_path)) 
+        {
+            // Truncation occurred
+            fprintf(stderr, "Warning: very long command path, bigger than MAX_PATH\n");
+        }        
 
         // Check if the constructed full path is an executable file
         // X_OK is the mode used to check if the file specified by full_path has execute permissions.
@@ -395,6 +390,7 @@ void cmd_type(char *command)
         printf("%s is not recognized as an internal or external command\n", command);
     }
 }
+
 
 
 
