@@ -4,7 +4,7 @@
  * @author         : Ali Mamdouh
  * @brief          : Header of command.c
  * @Reviwer        : Eng Kareem
- * @Version        : 2.0.0
+ * @Version        : 2.1.0
  * @Company        : STMicroelectronics
  * @Date           : 30/7/2024 
  *===================================================================================
