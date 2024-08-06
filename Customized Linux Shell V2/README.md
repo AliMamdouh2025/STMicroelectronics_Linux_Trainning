@@ -151,3 +151,74 @@ execvp error for nonexistentcommand: No such file or directory
 ![image_2024-07-30_08-58-54](https://github.com/user-attachments/assets/09984a12-47ef-47e5-b739-5d6fd1ab460b)
 
 
+
+
+
+
+
+# GDB Script Example: Print Process History and Count
+
+## Overview
+
+This GDB script defines a custom function to print the process history and count from the `process_history` array and the `process_history_count` variable. It provides a clear, organized, and readable output to help in debugging and analyzing the process execution history.
+
+## Script Details
+
+The script includes a function `print_process_history` that:
+1. Prints the value of the `process_history_count` variable.
+2. Prints a table header for the process history.
+3. Iterates through the `process_history` array and prints the index, command, and exit status of each process in a formatted manner.
+
+Additionally, an alias `printd` is created for easier access to the function.
+
+## Structure of `ProcessInfo`
+
+The script assumes that the `ProcessInfo` structure is defined with at least the following members:
+```c
+struct ProcessInfo {
+    char command[256];
+    int exit_status;
+};
+```
+
+### Steps to Use the Script
+
+1. **Create the GDB Script File**:
+   - Create a file named `print_process_history.gdb`.
+   - Copy and paste the content of print_process_history.gdb into the file:
+
+
+2. **Start GDB**:
+   - Open a terminal and start GDB with your executable. For example:
+     ```sh
+     gdb ./your_program
+     ```
+
+3. **Load the Script in GDB**:
+   - Within the GDB session, load the script using the `source` command:
+     ```gdb
+     source /path/to/print_process_history.gdb
+     ```
+   - Replace `/path/to/print_process_history.gdb` with the actual path to the script file.
+
+4. **Run Your Program (if necessary)**:
+   - If your program needs to be running to populate the `process_history` and `process_history_count`(which is our case) , start it with:
+     ```gdb
+     run
+     ```
+   - Ensure that the program has executed up to the point where the `process_history` and `process_history_count` are populated.
+
+5. **Call the GDB Function**:
+   - To print the process history and count, simply call the defined function:
+     ```gdb
+     print_process_history
+     ```
+   - Or use the alias for convenience:
+     ```gdb
+     printd
+     ```
+
+
+
+# GDB Video link
+https://drive.google.com/file/d/1y408VEdQHFd3YLZ7NBrcBYNNYxwjZV83/view?usp=sharing
