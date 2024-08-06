@@ -4,7 +4,7 @@
  * @author         : Ali Mamdouh
  * @brief          : Impelementation of commands to be executed by customized shell
  * @Reviwer        : Eng Kareem
- * @Version        : 2.1.0
+ * @Version        : 2.2.0
  * @Company        : STMicroelectronics
  * @Date           : 30/7/2024
  *===================================================================================
@@ -36,14 +36,19 @@
 /*============================================================================
  ********************************  Macros  ***********************************
  ============================================================================*/
-#define STRINGS_ARE_EQUAL             0
-#define SUCCESS_OPERATION             0
-#define FAILED_OPERATION             -1
-#define FILE_NOT_EXIST               -1
-#define INCREMENT_POINTER_BY_1        1
-#define ON                            1
-#define OFF                           0
-#define IS_EXECUTABLE                 0
+#define STRINGS_ARE_EQUAL                  0
+#define SUCCESS_OPERATION                  0
+#define FAILED_OPERATION                  -1
+#define FILE_NOT_EXIST                    -1
+#define ALL_OPTIONS_ARE_PARSED            -1
+#define INCREMENT_POINTER_BY_1             1
+#define FILE_DESCRIPTOR_0                  0
+#define FILE_DESCRIPTOR_1                  1
+#define FILE_DESCRIPTOR_2                  2
+#define ON                                 1
+#define OFF                                0
+#define IS_EXECUTABLE                      0
+#define MAX_PATH                           4096
 
 
 
@@ -58,6 +63,287 @@ int process_history_count = 0;
 /*============================================================================
  ***********************  Functions Helper Definitions  **********************
  ============================================================================*/
+ /**
+ * Add a character at the beginning of a string.
+ *
+ * This function inserts a given character at the start of the provided string.
+ * It shifts all existing characters in the string one position to the right to make room for the new character.
+ * The function assumes that the string has enough space allocated to accommodate the additional character.
+ *
+ * @param str: Pointer to the null-terminated string (char*) where the character will be added.
+ * @param c: The character (char) to add at the beginning of the string.
+ */
+void addCharAtBeginning(char *str, char c) 
+{
+    // Print error message if no Str is dangling pointer
+    if(str == NULL)
+    {
+       perror("Error: Entering NULL to arguments of addCharAtBeginning() function");
+       return;
+    }
+    
+    // Get the length of the string
+    size_t length = strlen(str);
+
+    // Shift the characters in the string to the right
+    for (size_t i = length; i > 0; i--) 
+    {
+        str[i] = str[i-1];
+    }
+
+    // Insert the new character at the beginning
+    str[0] = c;
+
+    // Null-terminate the string
+    str[length + 1] = '\0';
+    
+}
+
+ 
+ 
+ 
+ 
+ 
+ 
+/**
+ * Parse and remove the '-a' option from the command-line arguments string.
+ *
+ * This function processes the provided command-line arguments string to identify and remove the '-a' option.
+ * If the '-a' option is found, it updates the option pointer to include '-a' and removes '-a' from the original arguments string.
+ * The function uses getopt() to parse the options and modifies the input string accordingly.
+ *
+ * @param args: Pointer to the command-line arguments string (char**). This string will be updated to exclude the '-a' option if found.
+ * @param option: Pointer to the option string (char**). This will be set to "-a" if the option is found in the input arguments.
+ */
+void TakeAndRemove_Option(char **args, char **option, char *optionType) 
+{
+
+    // Print error message if one of arguments is not entered or have value of NULL
+    if(*args == NULL || optionType == NULL)
+    {
+       perror("Error: Entering NULL to arguments of TakeAndRemove_Option() function");
+       return;
+    }
+    
+    // Declare variables for argument count, argument array, tokenization, and option parsing
+    int argc = 0;
+    char *argv[100];
+    char *token;
+    char optionArr[3];
+    int opt;
+    
+    // copy in array so I can edit on it
+    strcpy(optionArr, optionType);
+    
+    // Split the input string into an array of arguments
+    // strdup() duplicates the input string so that it can be safely tokenized without modifying the original string.
+    char *input = strdup(*args);
+    
+    // strtok() splits the input string into tokens based on spaces. The first token is assigned to 'token'.
+    token = strtok(input, " ");
+    
+    // Loop through the tokens and store them in the argv array, incrementing argc for each token.
+    while (token != NULL) 
+    {
+        argv[argc++] = token;
+        token = strtok(NULL, " ");
+    }
+
+    // Reset getopt's internal state
+    // optind is reset to 1 to ensure getopt() starts processing from the beginning of the argument list.
+    optind = 1;
+    
+    // Initialize the option pointer to NULL
+    *option = NULL;
+
+    // Parse options using getopt()
+    // getopt() parses the command-line arguments looking for the '-a' option.
+    while ((opt = getopt(argc, argv, optionArr)) != ALL_OPTIONS_ARE_PARSED) 
+    {
+        // Process the option returned by getopt()
+        if (opt == optionArr[0]) 
+        {
+             // If the '-a' option is found, duplicate the string "-a" and assign it to the option pointer.
+             addCharAtBeginning(optionArr, '-'); // for eaxample from "a" to "-a" to pass oprion not character
+             *option = strdup(optionArr); // duplicate to reserve original option
+             break;
+        }
+    }
+    
+    // If no option was found, return early
+    if (*option == NULL) return;
+
+    // Create a new string excluding the '-a' option
+    // Initialize an empty result string to build the new arguments string without the '-a' option.
+    char result[1024] = "";
+    
+    // Loop through the argv array and concatenate each argument to the result string, excluding the '-a' option.
+    for (int i = 0; i < argc; i++) 
+    {
+        if (i != optind - 1) 
+        {
+            strcat(result, argv[i]);
+            strcat(result, " ");
+        }
+    }
+    
+    // Remove trailing space from the result string
+    // If the result string is not empty and ends with a space, remove the trailing space by setting it to the null terminator.
+    if (strlen(result) > 0 && result[strlen(result) - 1] == ' ') 
+    {
+        result[strlen(result) - 1] = '\0';
+    }
+    
+    // Update the input args with the new string
+    // Duplicate the result string and assign it to the args pointer.
+    *args = strdup(result);
+
+    // Free the duplicated input string
+    free(input);
+}
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+/**
+ * Remove extra spaces from a file path string.
+ *
+ * This function processes the provided file path string to remove any leading, trailing, and extra spaces between words.
+ * It ensures that there is only a single space between words if spaces are present.
+ *
+ * @param args: Pointer to the file path string (char*). This string will be modified to remove extra spaces.
+ */
+void RemovePathSpaces(char *args) 
+{
+    // Print error message if one of arguments is not entered or have value of NULL
+    if(args == NULL)
+    {
+       perror("Error: Entering NULL to arguments of RemovePathSpaces() function");
+       return;
+    }
+
+    // Declare variables for indexing and determining the length of the input string.
+    int i = 0, j = 0;
+    int len = strlen(args);
+
+    // Remove leading spaces
+    // Loop to skip over any leading space characters in the input string.
+    while (isspace(args[i])) 
+    {
+        i++;
+    }
+
+    // Process the rest of the string
+    // Iterate through the rest of the string starting from the first non-space character.
+    for (; i < len; i++) 
+    {
+        // Copy non-space characters
+        // If the current character is not a space, copy it to the next position in the modified string.
+        if (!isspace(args[i])) 
+        {
+            args[j++] = args[i];
+        } 
+        else 
+        {
+            // If a space is found, check if the next character is non-space
+            // This ensures that only single spaces are copied between words.
+            if (i + 1 < len && !isspace(args[i + 1])) 
+            {
+                args[j++] = ' ';
+            }
+        }
+    }
+
+    // Remove trailing space if present
+    // If the last character in the modified string is a space, remove it.
+    if (j > 0 && isspace(args[j - 1])) 
+    {
+        j--;
+    }
+
+    // Null-terminate the string
+    // Add the null terminator to the end of the modified string.
+    args[j] = '\0';
+}
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ //The two paths must contains only one space between them without any other front or bachspaces,-
+ // if not pass args first to RemovePathSpaces(char *args) function
+ void split_Paths(char *args, char **source, char **dest) 
+ {
+    // Allocate memory for source and dest
+    *source = (char *)malloc(strlen(args) + 1);
+    *dest = (char *)malloc(strlen(args) + 1);
+    
+    // Print error message if one of arguments is not entered or have value of NULL
+    if(*source == NULL || *dest == NULL)
+    {
+       perror("Error: memory allocation failed in split_Paths() function");
+       return;
+    }
+
+    // Initialize pointers for parsing
+    char *start = args;
+    char *end;
+
+    // Check if the first path is quoted
+    if (*start == '"') 
+    {
+        // Find the end quote of the first path
+        end = strchr(start + 1, '"');
+        if (end == NULL) 
+        {
+            // Invalid input
+            return;
+        }
+ 
+        // Copy the first path (including quotes)
+        strncpy(*source, start, end - start + 1);
+        (*source)[end - start + 1] = '\0';
+        
+        // Skip to the second path
+        start = end + 2; // Skip the quote and the space
+    } else 
+    {
+        // Find the space separating the two paths
+        end = strchr(start, ' ');
+        if (end == NULL) 
+        {
+            // Invalid input
+            return;
+        }
+        // Copy the first path
+        strncpy(*source, start, end - start);
+        (*source)[end - start] = '\0';
+        // Skip to the second path
+        start = end + 1; // Skip the space
+    }
+
+    // Copy the second path
+    strcpy(*dest, start);
+}
+
+ 
+ 
+ 
+ 
+ 
 
 /**
  * Add a command and its exit status to the process history.
@@ -74,6 +360,14 @@ int process_history_count = 0;
  */
 void add_to_process_history(const char *command, int exit_status) 
 {
+        // Print error message if one of arguments is not entered or have value of NULL
+        if(command == NULL)
+        {
+           perror("Error: Entering NULL command to add_to_process_history() function");
+           return;
+        }
+        
+        // create needed index
 	int index = process_history_count % MAX_PROCESS_HISTORY;
 
 	// Copy the command to the process history buffer
@@ -479,8 +773,20 @@ void cmd_pwd(void)
  */
 void cmd_echo(char *args) 
 {
-	// Print the provided arguments followed by a newline
-	printf("%s\n", args);
+        // Print error message if argument is not entered or have value of NULL
+        if(args == NULL)
+        {
+           // Prints Enter if there is no arguments to be like original shell
+           write(FILE_DESCRIPTOR_1, "\n", 1);
+           return;
+        }
+        
+        // Filter quotes if it exists
+        args =  extract_quoted_arg(args);
+        
+        // Writing contents of args then write enter to file descrptor1(output terminal) 
+        write(FILE_DESCRIPTOR_1, args, strlen(args));
+        write(FILE_DESCRIPTOR_1, "\n", 1);
 }
 
 
@@ -496,129 +802,146 @@ void cmd_echo(char *args)
 /**
  * Copy the contents of the source file to the destination file.
  * 
- * If destination file is the same of source file the function print error
- *
- * It supports an optional `-a` flag, which enables append mode-
- * even if destination file is the same of source file. 
- * 
- * If the destination is a directory, the function copy the source file(with its same name)-
+ * This function copies the content from the source file to the destination file. It supports an optional `-a` flag,
+ * which enables append mode. If the destination file is the same as the source file, the function prints an error unless 
+ * the `-a` flag is used. If the destination is a directory, the function copies the source file (with its same name) 
  * to the destination path.
  * 
- * The function performs error checking to ensure that both source and destination-
- * are specified and handles file opening, reading, and writing operations.
+ * The function performs error checking to ensure that both source and destination are specified, and handles file opening,
+ * reading, and writing operations.
  *
  * @param args: Pointer to a null-terminated string containing the command-line arguments.
  */
 void cmd_mycp(char *args)
 {
-	// Tokenize the arguments to extract source, destination, and optional flag
-	char *source = NULL;
-	char *dest = NULL;
-	char *option = NULL;
+    // Print error if no arguments are entered
+    if(args == NULL)
+    {
+        perror("Error: No arguments passed to mycp command!!");
+        return;       
+    }
 
-	//Takes first argumuent in source, and second argument & option(if exists) to dest
-	tokenize_Paths(args, &source, &dest);
+    // Declare pointers for source, destination, and optional flag
+    char *source = NULL;
+    char *dest = NULL;
+    char *option = NULL;
+    
+    // Extract the optional flag from the arguments
+    TakeAndRemove_Option(&args, &option, "a");
+    
+    // Remove extra spaces from the arguments
+    RemovePathSpaces(args);
 
-	//Takes from Second Argument in dest and the option(if exists) in option pointer
-	dest = strtok(dest, " ");
-	option = strtok(NULL, " ");
+    // Split the arguments into source and destination paths
+    split_Paths(args, &source, &dest);
 
-	//Filter the Source, option and destination Paths from "Quotes"
-	source = extract_quoted_arg(source);
-	dest = extract_quoted_arg(dest);
-	option = extract_quoted_arg(option);        
+    // Remove quotes from the source and destination paths
+    source = extract_quoted_arg(source);
+    dest = extract_quoted_arg(dest);
 
+    // Initialize the append mode flag to false
+    bool append = false;
 
-	// Initializes a boolean variable append to false. 
-	bool append = false;
+    // Check if source and destination are specified
+    if (!source || !dest) 
+    {
+        fprintf(stderr, "Usage: cp [-a] source destination\n");
+        return;
+    }
 
-	// Check if source and destination are specified
-	if (!source || !dest) 
-	{
-		fprintf(stderr, "Usage: cp [-a] source destination\n");
-		return;
-	}
+    // Check for append mode flag and set the append variable
+    if (option && strcmp(option, "-a") == STRINGS_ARE_EQUAL) 
+    {
+        append = true;
+    }
 
-	// Check for append mode flag
-	if (option && strcmp(option, "-a") == STRINGS_ARE_EQUAL) 
-	{
-		append = true;
-	}
+    // Convert relative paths to absolute paths
+    char abs_source[MAX_PATH];
+    char abs_dest[MAX_PATH];
+    
+    source = realpath(source, abs_source);
+    if (source == NULL) 
+    {
+        perror("Error resolving source path");
+        return;
+    }
+    
 
-	//Declares and initializes a stat structure to store information about the destination file.
-	struct stat st = {0};
+    dest = realpath(dest, abs_dest);
+    if (dest == NULL) 
+    {
+        perror("Error resolving destination path");
+        return;
+    }
 
-	// Check if destination is directory
-	// It fills the stat structure (st) with details about the file. 
-	// The stat structure contains various fields, including st_mode, which describes the file type and permissions-
-	// If successful, stat returns 0. If it returns -1, it indicates an error occurred.
-	// S_ISDIR(st.st_mode): A macro that checks if the st_mode field in the stat structure indicates that dest is a directory
-	if (stat(dest, &st) == SUCCESS_OPERATION && S_ISDIR(st.st_mode)) 
-	{
-		char *base = basename(source);  // Extract the base name of the source file from the PATH
-		char new_dest[MAX_PATH];  // Buffer to construct new destination path
-		snprintf(new_dest, sizeof(new_dest), "%s/%s", dest, base);  // Construct new destination path
-		dest = new_dest;  // Update destination to the new path
-	}
+    // Declare and initialize a stat structure to store information about the destination file
+    struct stat st = {0};
 
-	// Check if destination file exists(Check only in non-append mode)
-	// The access function checks the existence of a file. 
-	// The F_OK flag is used to check if the file exists, regardless of the type of access (read/write).
-	if (!append && access(dest, F_OK) != FILE_NOT_EXIST) 
-	{
-		fprintf(stderr, "Error: Destination file already exists\n");
-		return;
-	}
+    // Check if the destination is a directory
+    if (stat(dest, &st) == SUCCESS_OPERATION && S_ISDIR(st.st_mode)) 
+    {
+        // Extract the base name of the source file from the path
+        char *base = basename(strdup(source));
+        
+        // Buffer to construct new destination path
+        char new_dest[MAX_PATH];
+        
+        // Construct new destination path
+        snprintf(new_dest, sizeof(new_dest), "%s/%s", dest, base);
+        
+        // Update destination to the new path
+        dest = new_dest;
+    }        
 
-	// Open the source file for reading
-	int src_fd = open(source, O_RDONLY);
-	if (src_fd == FAILED_OPERATION) 
-	{
-		perror("Error opening source file");
-		return;
-	}
+    // Check if the destination file exists (only in non-append mode)
+    if (!append && access(dest, F_OK) != FILE_NOT_EXIST) 
+    {
+        fprintf(stderr, "Error: Destination file already exists\n");
+        return;
+    }
 
-	// Open the destination file for writing in truncate(overwrite) or append mode, Create if not exists. 
-	// 0644: This is the file permission modewhen creating the file. It is expressed in octal format-
-	// 6: Owner (user) has read and write permissions.
-	// 4: Group has read permissions.
-	// 4: Others have read permissions
-	int dest_fd = open(dest, O_WRONLY | O_CREAT | (append ? O_APPEND : O_TRUNC), 0644);
-	if (dest_fd == FAILED_OPERATION) 
-	{
-		perror("Error opening destination file");
-		close(src_fd);
-		return;
-	}
+    // Open the source file for reading
+    int src_fd = open(source, O_RDONLY);
+    if (src_fd == FAILED_OPERATION) 
+    {
+        perror("Error opening source file");
+        return;
+    }
 
-	// Buffer for file read/write operations
-	char buffer[BUFFER_SIZE];
-	ssize_t bytes_read, bytes_written;
+    // Open the destination file for writing in truncate (overwrite) or append mode, create if not exists
+    int dest_fd = open(dest, O_WRONLY | O_CREAT | (append ? O_APPEND : O_TRUNC), 0644);
+    if (dest_fd == FAILED_OPERATION) 
+    {
+        perror("Error opening destination file");
+        close(src_fd);
+        return;
+    }
 
-	// Read from source and write to destination
-	while ((bytes_read = read(src_fd, buffer, BUFFER_SIZE)) > 0) 
-	{
-		bytes_written = write(dest_fd, buffer, bytes_read);
-		if (bytes_written != bytes_read) 
-		{
-			perror("Write error");
-			break;
-		}
-	}
+    // Buffer for file read/write operations
+    char buffer[BUFFER_SIZE];
+    ssize_t bytes_read, bytes_written;
 
-	// Check for read error
-	if (bytes_read == FAILED_OPERATION) 
-	{
-		perror("Read error");
-	}
+    // Read from source and write to destination
+    while ((bytes_read = read(src_fd, buffer, BUFFER_SIZE)) > 0) 
+    {
+        bytes_written = write(dest_fd, buffer, bytes_read);
+        if (bytes_written != bytes_read) 
+        {
+            perror("Write error");
+            break;
+        }
+    }
 
-	// Close source and destination files
-	close(src_fd);
-	close(dest_fd);
+    // Check for read error
+    if (bytes_read == FAILED_OPERATION) 
+    {
+        perror("Read error");
+    }
+
+    // Close source and destination files
+    close(src_fd);
+    close(dest_fd);
 }
-
-
-
 
 
 
@@ -641,25 +964,34 @@ void cmd_mycp(char *args)
  */
 void cmd_mymv(char *args) 
 {
+
+         // Print error if no arguments are entered
+         if(args == NULL)
+         {
+            perror("Error: No arguments passed to mymv command!!");
+            return;       
+         }
+
 	// Tokenize the arguments to extract source, destination, and optional flag
 	char *source = NULL;
 	char *dest = NULL;
 	char *option = NULL;
 
-	//Takes first argumuent in source, and second argument & option(if exists) to dest
-	tokenize_Paths(args, &source, &dest);
+        // Extract the optional flag from the arguments
+        TakeAndRemove_Option(&args, &option, "f");
+    
+        // Remove extra spaces from the arguments
+        RemovePathSpaces(args);
 
-	//Takes from Second Argument in dest and the option(if exists) in option pointer
-	dest = strtok(dest, " ");
-	option = strtok(NULL, " ");
+        // Split the arguments into source and destination paths
+        split_Paths(args, &source, &dest);
 
-	//Filter the Source, option and destination Paths from "Quotes"
-	source = extract_quoted_arg(source);
-	dest = extract_quoted_arg(dest);
-	option = extract_quoted_arg(option);        
+        // Remove quotes from the source and destination paths
+        source = extract_quoted_arg(source);
+        dest = extract_quoted_arg(dest);
 
-	// Boolean flag to determine whether to forcefully overwrite an existing destination file
-	bool force = false;
+	 // Boolean flag to determine whether to forcefully overwrite an existing destination file
+	 bool force = false;
 
 	// Check if both source and destination are provided
 	if (!source || !dest) 
@@ -674,6 +1006,26 @@ void cmd_mymv(char *args)
 	{
 		force = true;
 	}
+	
+        // Convert relative paths to absolute paths
+        char abs_source[MAX_PATH];
+        char abs_dest[MAX_PATH];
+    
+        source = realpath(source, abs_source);
+        if (source == NULL) 
+        {
+            perror("Error resolving source path");
+            return;
+        }
+
+
+        dest = realpath(dest, abs_dest);
+        if (dest == NULL) 
+        {
+           perror("Error resolving destination path");
+           return;
+        }
+
 
 	// Initialize a stat structure to store information about the destination
 	struct stat st = {0};
@@ -682,7 +1034,7 @@ void cmd_mymv(char *args)
 	if (stat(dest, &st) == SUCCESS_OPERATION && S_ISDIR(st.st_mode)) 
 	{
 		// Extract the base name of the source file (e.g., "file.txt" from "/path/to/file.txt")
-		char *base = basename(source);
+		char *base = basename(strdup(source));
 
 		// Buffer to construct the new destination path
 		char new_dest[MAX_PATH];
