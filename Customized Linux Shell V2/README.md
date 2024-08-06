@@ -106,6 +106,29 @@ After compilation, start the shell with:
    ```
 ![image_2024-07-30_08-51-25](https://github.com/user-attachments/assets/a2c1c41e-3693-4362-81ab-27bbbf50fd53)
 
+7. **mycp**: Improve the command so it can copy files using relative paths even if paths have spaces in its naming.
+![CopyingTestCase](https://github.com/user-attachments/assets/75364054-8797-4dea-9458-3912fbf5c2f2)
+
+![CopyingTestCase2](https://github.com/user-attachments/assets/e17d100e-8021-4f24-b064-b50e0bb0db1d)
+
+![CopyingTestCase3](https://github.com/user-attachments/assets/83adbf15-73ef-4ad8-bfe3-2c06a53f4fe6)
+
+![CopyingTestCase4](https://github.com/user-attachments/assets/0417bd83-3208-4b27-b184-05b44638ebe6)
+
+
+8. **mymv**: Improve the command so it can move files using relative paths even if paths have spaces in its naming.
+
+![CuttingTestCase](https://github.com/user-attachments/assets/4ad4da88-091e-4672-b0c8-3a76d88fe198)
+
+![CuttingTestCase2](https://github.com/user-attachments/assets/664196b7-cc02-4a6d-8a75-5bfc2f5ac730)
+
+![CuttingTestCase3](https://github.com/user-attachments/assets/09639de4-938d-4bb2-ae54-c2fa7ec24b4b)
+
+![CuttingTestCase4](https://github.com/user-attachments/assets/e2791c88-791e-452b-9f39-4aeaca80aea5)
+
+
+
+
 
 ### External Commands
 
