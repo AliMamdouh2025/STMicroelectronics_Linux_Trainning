@@ -4,7 +4,7 @@
  * @author         : Ali Mamdouh
  * @brief          : Impelementation of commands to be executed bu customized shell
  * @Reviwer        : Eng Kareem
- * @Version        : 2.1.0
+ * @Version        : 2.2.0
  * @Company        : STMicroelectronics
  *===================================================================================
  * 
@@ -304,7 +304,7 @@ int main()
 		args = strtok(NULL, "\n");
 
 		//Filter Quters of Argument if they exists
-		args = extract_quoted_arg(args);
+		//args = extract_quoted_arg(args);
 
 
 
