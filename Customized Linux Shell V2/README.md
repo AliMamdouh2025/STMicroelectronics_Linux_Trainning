@@ -8,18 +8,15 @@ To compile the custom shell, use the following command:
 
 ```
 gcc -o myshell myshell.c commands.c variables.c -lreadline -lm```
+```
 
 Ensure that the `readline` library is installed on your system. On Ubuntu or Debian-based systems, you can install it with:
-
-```
 sudo apt-get install libreadline-dev
-```
 
 ## Usage
-
 After compilation, start the shell with:
 
-```bash
+```
 ./myshell
 ```
 
