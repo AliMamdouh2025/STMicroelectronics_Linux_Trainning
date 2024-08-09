@@ -7,8 +7,7 @@ This project provides a custom shell that includes built-in commands and the cap
 To compile the custom shell, use the following command:
 
 ```
-gcc myshell.c commands.c -o myshell -lreadline -lm
-```
+gcc -o myshell myshell.c commands.c variables.c -lreadline -lm```
 
 Ensure that the `readline` library is installed on your system. On Ubuntu or Debian-based systems, you can install it with:
 
