@@ -4,7 +4,7 @@
  * @author         : Ali Mamdouh
  * @brief          : Header of command.c
  * @Reviwer        : Eng Kareem
- * @Version        : 2.2.0
+ * @Version        : 3.0.0
  * @Company        : STMicroelectronics
  * @Date           : 30/7/2024 
  *===================================================================================
@@ -54,7 +54,7 @@ extern int process_history_count;
 
 
 /*============================================================================
- ***********************  Functions Helper Definitions  **********************
+ **********************  Functions Helper Declerations  **********************
  ============================================================================*/
 char* extract_quoted_arg(char* input);
 void tokenize_Paths(const char *MainArgument, char **FirstPath, char **SecondPath); 
@@ -63,7 +63,7 @@ void tokenize_Paths(const char *MainArgument, char **FirstPath, char **SecondPat
 
 
 /*============================================================================
- ***********************  Functions Command Definitions  *********************
+ **********************  Functions Command Declerations  *********************
  ============================================================================*/
 void cmd_pwd(void);
 void cmd_echo(char *args);
@@ -76,5 +76,8 @@ void cmd_type(char *command);
 void cmd_envir(char *variable);
 void cmd_phist(void);
 void add_to_process_history(const char *command, int exit_status);
+void cmd_free(void);
+void cmd_uptime(void);
+void cmd_allVar(char *args);
 
 #endif
