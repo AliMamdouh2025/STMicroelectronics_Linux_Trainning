@@ -145,6 +145,13 @@ After compilation, start the shell with:
 
 
 
+13. **Combined redirection and multiple Piping**: Multiple piping in a myshell Works without any bug when combined with redirection command.
+
+![image](https://github.com/user-attachments/assets/36488a7c-f137-43dc-958c-831cdbbc1795)
+
+
+
+
 14. **allVar**: In myshell, you can add local and environment variables using standard assignment syntax. The envir command prints environment variables, while the allVar command displays both local and environment variables.
 ![BashVariables](https://github.com/user-attachments/assets/ab8cccec-132f-4db1-98fc-f108f6e6f708)
 
