@@ -138,10 +138,14 @@ After compilation, start the shell with:
 ![Redirection](https://github.com/user-attachments/assets/97faf118-6f16-4f65-a9a3-913fbcf739d0)
 
 12. **Multiple Parallel Piping**: Multiple piping in a myshell allows the output of one command to be passed as input to the next command, enabling the chaining of several commands in **Parallel**.
+![image](https://github.com/user-attachments/assets/2c6f715b-d2b8-4b1b-8f72-2c42bd6f4719)
+
+![MultplePiplinning](https://github.com/user-attachments/assets/36005b02-7ca7-480c-8798-6afd95a55cd9)
 
 
 
-13. **allVar**: In myshell, you can add local and environment variables using standard assignment syntax. The envir command prints environment variables, while the allVar command displays both local and environment variables.
+
+14. **allVar**: In myshell, you can add local and environment variables using standard assignment syntax. The envir command prints environment variables, while the allVar command displays both local and environment variables.
 ![BashVariables](https://github.com/user-attachments/assets/ab8cccec-132f-4db1-98fc-f108f6e6f708)
 
 
