@@ -467,11 +467,11 @@ void execute_pipeline(struct command *commands, int cmd_count)
 		else if (pids[i] == 0) 
 		{
 			// Child process
-			if (i > 0) 
+			if (i > 0) // it's not the first command in the pipeline
 			{
 				dup2(pipes[i-1][0], STDIN_FILENO);  // Redirect the input to the read end of the previous pipe.
 			}
-			if (i < cmd_count - 1) 
+			if (i < cmd_count - 1) // it's not the last command in the pipeline
 			{
 				dup2(pipes[i][1], STDOUT_FILENO);  // Redirect the output to the write end of the current pipe.
 			}
