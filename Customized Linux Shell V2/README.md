@@ -126,6 +126,23 @@ After compilation, start the shell with:
 ![CuttingTestCase4](https://github.com/user-attachments/assets/e2791c88-791e-452b-9f39-4aeaca80aea5)
 
 
+9. **myfree**: print RAM info ( total size, used and free) and Swap area info (total size, used, free)
+
+10. **myuptime**: print the uptime for the system and the time spent in the idle process.
+
+![myfree_myuptime](https://github.com/user-attachments/assets/9d9856b8-7577-49ef-9b8d-ad1f0e718a42)
+
+
+11. **Redirections**: Supports input, output, and error redirection for handling file streams in commands.
+
+![Redirection](https://github.com/user-attachments/assets/97faf118-6f16-4f65-a9a3-913fbcf739d0)
+
+12. **Multiple Parallel Piping**: Multiple piping in a myshell allows the output of one command to be passed as input to the next command, enabling the chaining of several commands in **Parallel**.
+
+
+
+13. **allVar**: In myshell, you can add local and environment variables using standard assignment syntax. The envir command prints environment variables, while the allVar command displays both local and environment variables.
+![BashVariables](https://github.com/user-attachments/assets/ab8cccec-132f-4db1-98fc-f108f6e6f708)
 
 
 
