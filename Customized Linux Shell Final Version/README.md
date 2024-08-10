@@ -234,6 +234,9 @@ struct ProcessInfo {
      printd
      ```
 
+# top command explanation
+     https://drive.google.com/file/d/1eNaE3uawNOx191bO-xAoMqIvGsPlwVNT/view?usp=drive_link
+
 
 
 # GDB Video link
