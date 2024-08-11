@@ -4,7 +4,7 @@
  * @author         : Ali Mamdouh
  * @brief          : Impelementation of commands to be executed bu customized shell
  * @Reviwer        : Eng Kareem
- * @Version        : 3.0.0
+ * @Version        : 3.1.0
  * @Company        : STMicroelectronics
  *===================================================================================
  * 
@@ -25,11 +25,12 @@
 #include <ctype.h>
 #include <readline/readline.h>
 #include <readline/history.h>
-#include "commands.h"
 #include <stdbool.h>
 #include <sys/wait.h>
 #include <errno.h>
 #include <fcntl.h>
+#include "commands.h"
+#include "variables.h"
 
 
 
@@ -467,11 +468,11 @@ void execute_pipeline(struct command *commands, int cmd_count)
 		else if (pids[i] == 0) 
 		{
 			// Child process
-			if (i > 0) // it's not the first command in the pipeline
+			if (i > 0) 
 			{
 				dup2(pipes[i-1][0], STDIN_FILENO);  // Redirect the input to the read end of the previous pipe.
 			}
-			if (i < cmd_count - 1) // it's not the last command in the pipeline
+			if (i < cmd_count - 1) 
 			{
 				dup2(pipes[i][1], STDOUT_FILENO);  // Redirect the output to the write end of the current pipe.
 			}
@@ -585,123 +586,215 @@ void Execute_External_Command(char *cmd, char *args, char *input)
 
 
 
+
+
+
+
+
+
+/**
+ * Execute a single command.
+ *
+ * This function determines whether the provided command is an internal command or an external command.
+ * If it is an internal command, it executes the associated function. Otherwise, it attempts to execute 
+ * the command as an external command by calling the appropriate function.
+ *
+ * @param cmd: A struct representing the command to be executed, which includes the command name 
+ *             and its arguments.
+ * @param input: A pointer to the input string that contains the entire command line input.
+ */
+void execute_single_command(struct command cmd, char *input)
+{
+    // Initialize a boolean variable to track if the command is an internal command.
+    bool command_found = false;
+
+    // Loop through the list of internal commands to check if the given command matches any internal command.
+    for (int i = 0; internal_commands[i].name != NULL; i++) 
+    {
+        // Compare the command name with the current internal command's name.
+        if (strcmp(cmd.argv[0], internal_commands[i].name) == STRINGS_ARE_EQUAL) 
+        {
+            // Skip the command name in the input string to isolate the arguments.
+            char *args = input + strlen(cmd.argv[0]);
+            
+            // Skip any leading spaces in the arguments.
+            while (*args == ' ') args++;
+            
+            // Call the function associated with the internal command, passing the arguments.
+            internal_commands[i].function(args);
+            
+            // Mark that the command was found as an internal command.
+            command_found = true;
+            
+            // Exit the loop as the command has been found and executed.
+            break;
+        }
+    }
+
+    // If the command was not found in the list of internal commands, handle it as an external command.
+    if (!command_found) 
+    {
+        // Isolate the command name from the struct.
+        char *command = cmd.argv[0];
+        
+        // Skip the command name in the input string to isolate the arguments.
+        char *args = input + strlen(command);
+        
+        // Skip any leading spaces in the arguments.
+        while (*args == ' ') args++;
+        
+        // Execute the command as an external command using the appropriate function.
+        Execute_External_Command(command, args, input);
+    }
+}
+
+
+
+
+
+
+
+/**
+ * Execute a command or a pipeline of commands.
+ *
+ * This function takes an input command string, parses it to determine whether it contains
+ * a pipeline of commands, and then either executes a single command or a pipeline of commands
+ * based on the parsed result.
+ *
+ * @param input: A pointer to the input string containing the command(s) to be executed. 
+ *               This string may contain a single command or multiple commands separated by pipes.
+ */
+void execute_command(char *input)
+{
+    // Declare an array to hold the parsed commands, with a maximum size defined by MAX_PIPES.
+    struct command commands[MAX_PIPES];
+    
+    // Parse the input string to identify and split commands in a pipeline. 
+    // The function returns the number of commands parsed.
+    int cmd_count = parse_pipeline(input, commands);
+
+    // If there is no pipeline (only a single command), execute the single command.
+    if (cmd_count == NO_PIPELINE) 
+    {
+        execute_single_command(commands[0], input);
+    } 
+    // If there are multiple commands in the pipeline, execute the pipeline.
+    else if (cmd_count > NO_PIPELINE) 
+    {
+        execute_pipeline(commands, cmd_count);
+    }
+}
+
+
+
+
+
+
+/**
+ * Process the input command string.
+ *
+ * This function handles different types of input commands, including variable assignments,
+ * special commands like "allVar" and "myexit," and general command execution. It returns 
+ * a boolean indicating whether the shell should continue running.
+ *
+ * @param input: A pointer to the input string containing the command to be processed. 
+ *               This string may represent a variable assignment, a special command, 
+ *               or a general command.
+ * 
+ * @return: A boolean value. Returns `false` to indicate that the shell should continue running.
+ *          If the command is "myexit," it returns the result of `cmd_exit()`, which typically
+ *          signals whether to exit the shell.
+ */
+bool process_input(char *input)
+{
+    // Check if the input is a variable assignment and handle it if true.
+    if (is_variable_assignment(input)) 
+    {
+        handle_variable_assignment(input);
+        return false;
+    } 
+    // Check if the input is the "allVar" command, which lists all variables.
+    else if (strcmp(input, "allVar") == 0) 
+    {
+        cmd_allVar(NULL);
+        return false;
+    }
+    // Check if the input is the "myexit" command, which may signal the shell to exit.
+    else if (strcmp(input, "myexit") == STRINGS_ARE_EQUAL) 
+    {
+        return cmd_exit();
+    } 
+    // If the input is none of the above, treat it as a general command and execute it.
+    else 
+    {
+        execute_command(input);
+        return false;
+    }
+}
+
+
+
 /*============================================================================
  ******************************  Main Code  **********************************
  ============================================================================*/
 
 /**
- * Main function that manages user input and command execution in a command-line interface.
+ * Main function for the command-line interpreter.
  *
- * This function reads user input, processes commands, handles internal and external commands,
- * and manages command history. It uses GNU Readline for input handling and maintains a loop 
- * until an exit command is given.
+ * This function initializes the command-line interface, processes user input in a loop, and handles 
+ * the exit condition for the shell. It reads user input, processes it, and decides whether the shell 
+ * should continue running based on the commands provided.
+ *
+ * @return: An integer value representing the exit status of the program. Typically, `0` indicates 
+ *          a successful execution.
  */
 int main() 
 {
-	// Declare a pointer to store user input
-	char *input;
+    // Pointer to hold the user input string.
+    char *input;
+    
+    // Boolean flag to determine whether the shell should exit the main loop.
+    bool should_exit = false;
 
-	// Initialize a flag to control the loop termination
-	bool should_exit = false;
+    // Bind the tab key to the default readline insert function, allowing for regular tab usage.
+    rl_bind_key('\t', rl_insert);
 
-	// Bind the TAB key to the rl_insert function for GNU Readline
-	rl_bind_key('\t', rl_insert);
+    // Main loop of the shell that continues until the user requests to exit.
+    while (!should_exit) 
+    {
+        // Display the prompt and read a line of input from the user.
+        input = readline(PROMPT);
 
-	// Start a loop that continues until should_exit is true
-	while (!should_exit) 
-	{
-		// Display the prompt and read user input into the input variable
-		input = readline(PROMPT);
+        // If the input is NULL (e.g., if EOF is encountered), print a newline and break the loop.
+        if (input == NULL) 
+        {
+            printf("\n");
+            break;
+        }
 
-		// Check if the input is NULL, indicating end-of-input (Ctrl+D)
-		if (input == NULL) 
-		{
-			// Print a newline character if input is NULL
-			printf("\n");
-			// Exit the loop if end-of-input is detected
-			break;
-		}
+        // Remove leading and trailing whitespace from the input string.
+        Remove_Leading_Trailing_Whitespaces(input);
 
-		// Remove leading and trailing whitespace from the input string
-		Remove_Leading_Trailing_Whitespaces(input);
+        // If the input string is empty after trimming, free the memory and continue to the next iteration.
+        if (strlen(input) == 0) 
+        {
+            free(input);
+            continue;
+        }
 
-		// Check if the input string is empty after trimming
-		if (strlen(input) == 0) 
-		{
-			// Free the memory allocated for the input string
-			free(input);
-			// Skip to the next iteration of the loop
-			continue;
-		}
+        // Add the non-empty input string to the command history.
+        add_history(input);
+        
+        // Process the input and check if the shell should exit based on the command.
+        should_exit = process_input(input);
 
-		// Add the input string to the command history
-		add_history(input);
+        // Free the memory allocated for the input string.
+        free(input);
+    }
 
-		// Check if the input matches the exit command "myexit"
-		if (strcmp(input, "myexit") == STRINGS_ARE_EQUAL) 
-		{
-			// Set the should_exit flag based on the result of cmd_exit function
-			should_exit = cmd_exit();
-		} 
-		else 
-		{
-			// Declare an array to hold parsed commands and their arguments
-			struct command commands[MAX_PIPES];
-			// Parse the input string into commands and count them
-			int cmd_count = parse_pipeline(input, commands);
-
-			// Check if there is only one command (no pipes)
-			if (cmd_count == NO_PIPELINE) 
-			{
-				// Initialize a flag to track if an internal command is found
-				bool command_found = false;
-
-				// Iterate through the list of internal commands
-				for (int i = 0; internal_commands[i].name != NULL; i++) 
-				{
-					// Check if the input command matches an internal command
-					if (strcmp(commands[0].argv[0], internal_commands[i].name) == STRINGS_ARE_EQUAL) 
-					{
-						// Calculate the pointer to the arguments part of the input string
-						char *args = input + strlen(commands[0].argv[0]);
-						// Skip any leading spaces in the arguments
-						while (*args == ' ') args++;
-						// Call the internal command function with the arguments
-						internal_commands[i].function(args);
-						// Set the command_found flag to true
-						command_found = true;
-						// Exit the loop as the command has been found and executed
-						break;
-					}
-				}
-
-				// Check if no internal command was found
-				if (!command_found) 
-				{
-					// Store the command and arguments for execution
-					char *cmd = commands[0].argv[0];
-					char *args = input + strlen(cmd);
-					// Skip any leading spaces in the arguments
-					while (*args == ' ') args++;
-					// Execute the external command with the arguments
-					Execute_External_Command(cmd, args, input);
-				}
-			} 
-			else if (cmd_count > NO_PIPELINE) 
-			{
-				// Handle multiple commands (piped commands)
-				execute_pipeline(commands, cmd_count);
-			}
-		}
-
-		// Free the memory allocated for the input string
-		free(input);
-	}
-
-	// Clear the command history
-	rl_clear_history();
-
-	// Return 0 to indicate successful execution of the program
-	return 0;
+    // Clear the command history before exiting the program.
+    rl_clear_history();
+    
+    // Return 0 to indicate successful execution of the program.
+    return 0;
 }
-
