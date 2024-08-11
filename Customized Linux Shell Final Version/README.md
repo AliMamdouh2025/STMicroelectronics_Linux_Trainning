@@ -152,7 +152,7 @@ After compilation, start the shell with:
 
 
 
-14. **allVar**: In myshell, you can add local and environment variables using standard assignment syntax. The envir command prints environment variables, while the allVar command displays both local and environment variables.
+14. **myallVar**: In myshell, you can add local and environment variables using standard assignment syntax. The envir command prints environment variables, while the allVar command displays both local and environment variables.
 ![BashVariables](https://github.com/user-attachments/assets/ab8cccec-132f-4db1-98fc-f108f6e6f708)
 
 
