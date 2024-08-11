@@ -4,7 +4,7 @@
  * @author         : Ali Mamdouh
  * @brief          : Impelementation of commands to be executed bu customized shell
  * @Reviwer        : Eng Kareem
- * @Version        : 3.1.0
+ * @Version        : 3.0.0
  * @Company        : STMicroelectronics
  *===================================================================================
  * 
@@ -114,6 +114,7 @@ Command internal_commands[] =
 		{"myphist", (void (*)(char*))cmd_phist},
 		{"myfree", (void (*)(char*))cmd_free},
 		{"myuptime", (void (*)(char*))cmd_uptime}, 
+		{"allVar", (void (*)(char*))cmd_allVar}, 	
 		{NULL, NULL}  // This is used to mark the end of the array.
 };
 
@@ -713,12 +714,6 @@ bool process_input(char *input)
         handle_variable_assignment(input);
         return false;
     } 
-    // Check if the input is the "allVar" command, which lists all variables.
-    else if (strcmp(input, "allVar") == 0) 
-    {
-        cmd_allVar(NULL);
-        return false;
-    }
     // Check if the input is the "myexit" command, which may signal the shell to exit.
     else if (strcmp(input, "myexit") == STRINGS_ARE_EQUAL) 
     {
