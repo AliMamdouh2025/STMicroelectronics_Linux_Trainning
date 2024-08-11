@@ -125,120 +125,139 @@ Command internal_commands[] =
  **************************  Functions Definitions  **************************
  ============================================================================*/
 /**
- * Parses redirection operators ('<', '>', '2>') from the command arguments.
- * Modifies the `args` array by removing redirection elements and storing them in the `redirections` array.
+ * Parse redirections from the command arguments and store them in the provided redirection structure.
  *
- * @param args          Pointer to the array of command arguments.
- * @param redirections  Array to store the parsed redirections.
- * @return              The number of redirections parsed, or -1 if an error occurs.
+ * The function processes the command arguments to identify input, output, and error redirections. 
+ * It updates the redirections array with the type and file associated with each redirection.
+ *
+ * @param args: Pointer to the array of command arguments (char**). The function will modify this array.
+ * @param redirections: Pointer to an array of redirection structures (struct redirection*). 
+ *                       This will be populated with the parsed redirection information.
+ *
+ * @return: The number of redirections parsed, or -1 if an error occurred.
  */
 int parse_redirections(char **args, struct redirection *redirections) 
 {
-	// Return immediately if there are no arguments.
-	if (*args == NULL) return -1;
+    // Initialize the count of redirections found
+    int count = 0;
 
-	int count = 0; // Initialize the redirection count.
-	char *arg = *args; // Pointer to the first argument.
-	// Allocate memory for a new arguments string to store the command without redirection parts.
-	char *new_args = malloc(strlen(arg) + 1);
-	char *new_args_ptr = new_args; // Pointer to traverse the new_args string.
-	int in_quotes = 0; // Flag to track if the current character is inside quotes.
+    // Pointer to the current argument being processed
+    char *arg;
 
-	// Check if memory allocation failed.
-	if (new_args == NULL) 
-	{
-		perror("Memory allocation failed");
-		return -1;
-	}
+    // Pointer to store the new arguments with redirections removed
+    char *new_args;
 
-	// Iterate through each character in the original arguments.
-	while (*arg) 
-	{
-		// Toggle the in_quotes flag if a quote is encountered.
-		if (*arg == '"') 
-		{
-			in_quotes = !in_quotes;
-			*new_args_ptr++ = *arg++; // Copy the quote to new_args and move to the next character.
-			continue;
-		}
+    // Pointer used to build the new_args string
+    char *new_args_ptr;
 
-		// If not inside quotes and a redirection operator is found.
-		if (!in_quotes && (*arg == '<' || *arg == '>' || (*arg == '2' && *(arg+1) == '>'))) 
-		{
-			// Check if the maximum number of redirections has been reached.
-			if (count >= MAX_REDIRECTIONS) 
-			{
-				fprintf(stderr, "Too many redirections\n");
-				free(new_args); // Free the allocated memory for new_args.
-				return -1;
-			}
+    // Flag to track if we are inside quotes
+    int in_quotes = 0;
 
-			// Determine the type of redirection (input, output, or error).
-			if (*arg == '<') 
-			{
-				redirections[count].type = 0; // Input redirection.
-				arg++;
-			} 
-			else if (*arg == '>') 
-			{
-				redirections[count].type = 1; // Output redirection.
-				arg++;
-			} 
-			else 
-			{
-				redirections[count].type = 2; // Error redirection (2>).
-				arg += 2;
-			}
+    // Check if there are no arguments to process
+    if (*args == NULL) 
+    {
+        return 0;  // No arguments, so no redirections
+    }
 
-			// Skip any spaces following the redirection operator.
-			while (*arg == ' ') arg++; 
+    // Start processing from the first argument
+    arg = *args;
 
-			char *start = arg; // Mark the start of the file name.
-			// If the file name starts with a quote, find the closing quote.
-			if (*start == '"') 
-			{
-				start++;
-				arg = strchr(start, '"');
-				// If no closing quote is found, report an error.
-				if (arg == NULL) 
-				{
-					fprintf(stderr, "Unmatched quote\n");
-					free(new_args); // Free the allocated memory for new_args.
-					return -1;
-				}
-				arg++;  // Move past the closing quote.
-			} 
-			else 
-			{
-				// Move the pointer until a space or another redirection operator is found.
-				while (*arg && *arg != ' ' && *arg != '<' && *arg != '>' && !(*arg == '2' && *(arg+1) == '>')) arg++;
-			}
+    // Allocate memory for the new arguments
+    new_args = malloc(strlen(arg) + 1);
+    if (new_args == NULL) 
+    {
+        perror("Memory allocation failed");  // Print error if memory allocation fails
+        return -1;
+    }
+    new_args_ptr = new_args;  // Initialize the pointer for building new_args
 
-			// Calculate the length of the file name.
-			int len = arg - start;
-			// Allocate memory for the file name and store it in the redirections array.
-			redirections[count].file = malloc(len + 1);
-			if (redirections[count].file == NULL) 
-			{
-				perror("Memory allocation failed");
-				free(new_args); // Free the allocated memory for new_args.
-				return -1;
-			}
-			strncpy(redirections[count].file, start, len);
-			redirections[count].file[len] = '\0'; // Null-terminate the file name.
+    // Process each character in the argument string
+    while (*arg) 
+    {
+        // Toggle the quotes flag when encountering a quote
+        if (*arg == '"') 
+        {
+            in_quotes = !in_quotes;
+        }
 
-			count++; // Increment the redirection count.
-		} 
-		else 
-		{
-			// If not a redirection, copy the character to new_args.
-			*new_args_ptr++ = *arg++;
-		}
-	}
-	*new_args_ptr = '\0'; // Null-terminate the new_args string.
+        // Check for redirection symbols outside quotes
+        if (!in_quotes && (*arg == '<' || *arg == '>' || (*arg == '2' && *(arg+1) == '>'))) 
+        {
+            // Error if the number of redirections exceeds the limit
+            if (count >= MAX_REDIRECTIONS) 
+            {
+                fprintf(stderr, "Too many redirections\n");
+                free(new_args);  // Free allocated memory
+                return -1;
+            }
 
-	*args = new_args; // Update the args pointer to point to the modified string.
-	return count; // Return the number of redirections parsed.
+            // Determine the type of redirection and adjust the argument pointer
+            if (*arg == '<') 
+            {
+                redirections[count].type = 0;  // Input redirection
+                arg++;
+            } else if (*arg == '>') 
+            {
+                redirections[count].type = 1;  // Output redirection
+                arg++;
+            } else 
+            {
+                redirections[count].type = 2;  // Error redirection
+                arg += 2;  // Skip "2>"
+            }
+
+            // Skip any spaces after the redirection symbol
+            while (*arg == ' ') arg++;
+
+            // Start of the file name for the redirection
+            char *start = arg;
+            if (*start == '"') 
+            {
+                start++;  // Skip the opening quote
+                arg = strchr(start, '"');  // Find the closing quote
+                if (arg == NULL) 
+                {
+                    fprintf(stderr, "Unmatched quote\n");  // Error if no matching quote
+                    free(new_args);  // Free allocated memory
+                    return -1;
+                }
+            } else 
+            {
+                // Skip until the end of the file name
+                while (*arg && *arg != ' ' && *arg != '<' && *arg != '>' && !(*arg == '2' && *(arg+1) == '>')) arg++;
+            }
+
+            // Calculate the length of the file name
+            int len = arg - start;
+            // Allocate memory for the file name
+            redirections[count].file = malloc(len + 1);
+            if (redirections[count].file == NULL) 
+            {
+                perror("Memory allocation failed");  // Print error if memory allocation fails
+                free(new_args);  // Free allocated memory
+                return -1;
+            }
+            // Copy the file name to the structure
+            strncpy(redirections[count].file, start, len);
+            redirections[count].file[len] = '\0';  // Null-terminate the file name
+
+            // Increment the redirection count
+            count++;
+            // Skip the closing quote if present
+            if (*arg == '"') arg++;
+        } else 
+        {
+            // Copy the character to new_args if not a redirection symbol
+            *new_args_ptr++ = *arg++;
+        }
+    }
+    // Null-terminate the new arguments string
+    *new_args_ptr = '\0';
+
+    // Update the original arguments pointer with the new arguments
+    *args = new_args;
+    // Return the number of redirections parsed
+    return count;
 }
 
 
@@ -248,70 +267,67 @@ int parse_redirections(char **args, struct redirection *redirections)
 
 
 
-
 /**
- * Applies the redirections parsed from the command arguments by changing the standard input/output/error
- * file descriptors to the corresponding files.
+ * Apply the specified redirections by modifying the standard input, output, and error file descriptors.
  *
- * @param redirections  Array of redirections to apply.
- * @param count         Number of redirections to apply.
+ * The function processes each redirection in the array and applies it using file descriptor manipulation functions.
+ *
+ * @param redirections: Pointer to an array of redirection structures (struct redirection*). 
+ *                       Contains the type and file associated with each redirection.
+ * @param count: The number of redirections to apply.
  */
 void apply_redirections(struct redirection *redirections, int count) 
 {
-	// Iterate through each redirection in the array.
-	for (int i = 0; i < count; i++) 
-	{
-		int fd; // File descriptor for the redirection.
-		switch (redirections[i].type) 
-		{
-		case 0:  // Input redirection
-			fd = open(redirections[i].file, O_RDONLY); // Open the file for reading.
-			if (fd == -1) 
-			{
-				perror("Failed to open input file");
-				exit(EXIT_FAILURE); // Exit if the file cannot be opened.
-			}
-			if (dup2(fd, STDIN_FILENO) == -1) 
-			{
-				perror("Failed to redirect input");
-				exit(EXIT_FAILURE); // Exit if the input cannot be redirected.
-			}
-			close(fd); // Close the file descriptor.
-			break;
+    // Iterate through each redirection
+    for (int i = 0; i < count; i++) 
+    {
+        // File descriptor for the redirection
+        int fd;
 
-		case 1:  // Output redirection
-			// Open the file for writing (truncate or create if it doesn't exist).
-			fd = open(redirections[i].file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-			if (fd == -1) 
-			{
-				perror("Failed to open output file");
-				exit(EXIT_FAILURE); // Exit if the file cannot be opened.
-			}
-			if (dup2(fd, STDOUT_FILENO) == -1) 
-			{
-				perror("Failed to redirect output");
-				exit(EXIT_FAILURE); // Exit if the output cannot be redirected.
-			}
-			close(fd); // Close the file descriptor.
-			break;
-
-		case 2:  // Error redirection
-			// Open the file for writing (truncate or create if it doesn't exist).
-			fd = open(redirections[i].file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-			if (fd == -1) 
-			{
-				perror("Failed to open error file");
-				exit(EXIT_FAILURE); // Exit if the file cannot be opened.
-			}
-			if (dup2(fd, STDERR_FILENO) == -1) 
-			{
-				perror("Failed to redirect error");
-				exit(EXIT_FAILURE); // Exit if the error output cannot be redirected.
-			}
-			close(fd); // Close the file descriptor.
-			break;
-		}
-	}
+        // Determine the type of redirection
+        switch (redirections[i].type) 
+        {
+            case 0:  // Input redirection
+                // Open the file for reading
+                fd = open(redirections[i].file, O_RDONLY);
+                if (fd == -1) 
+                {
+                    perror("Failed to open input file");  // Print error if file opening fails
+                    exit(EXIT_FAILURE);
+                }
+                // Redirect standard input to the file
+                dup2(fd, STDIN_FILENO);
+                // Close the file descriptor
+                close(fd);
+                break;
+            case 1:  // Output redirection
+                // Open the file for writing, create if not exists, truncate if exists
+                fd = open(redirections[i].file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+                if (fd == -1) 
+                {
+                    perror("Failed to open output file");  // Print error if file opening fails
+                    exit(EXIT_FAILURE);
+                }
+                // Redirect standard output to the file
+                dup2(fd, STDOUT_FILENO);
+                // Close the file descriptor
+                close(fd);
+                break;
+            case 2:  // Error redirection
+                // Open the file for writing, create if not exists, truncate if exists
+                fd = open(redirections[i].file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+                if (fd == -1) 
+                {
+                    perror("Failed to open error file");  // Print error if file opening fails
+                    exit(EXIT_FAILURE);
+                }
+                // Redirect standard error to the file
+                dup2(fd, STDERR_FILENO);
+                // Close the file descriptor
+                close(fd);
+                break;
+        }
+    }
 }
 
 
