@@ -4,7 +4,7 @@
  * @author         : Ali Mamdouh
  * @brief          : Impelementation of commands to be executed by customized shell
  * @Reviwer        : Eng Kareem
- * @Version        : 3.0.0
+ * @Version        : 3.1.0
  * @Company        : STMicroelectronics
  * @Date           : 30/7/2024
  *===================================================================================
