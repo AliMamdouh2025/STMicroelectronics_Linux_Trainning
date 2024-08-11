@@ -114,7 +114,7 @@ Command internal_commands[] =
 		{"myphist", (void (*)(char*))cmd_phist},
 		{"myfree", (void (*)(char*))cmd_free},
 		{"myuptime", (void (*)(char*))cmd_uptime}, 
-		{"allVar", (void (*)(char*))cmd_allVar}, 	
+		{"myallVar", (void (*)(char*))cmd_allVar}, 	
 		{NULL, NULL}  // This is used to mark the end of the array.
 };
 
