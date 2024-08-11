@@ -1241,6 +1241,8 @@ void cmd_help(void)
 	printf("10- myphist : list the last 10 processes with their exit status\n");
 	printf("11- myfree : print RAM and Swap area information\n");
 	printf("12- myuptime : print system uptime and idle time\n");
+	printf("13- myallVar : print all local and enviroment variables\n");
+
 }
 
 
