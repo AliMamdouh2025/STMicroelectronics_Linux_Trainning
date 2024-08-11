@@ -4,7 +4,7 @@
  * @author         : Ali Mamdouh
  * @brief          : Header of variables.c
  * @Reviwer        : Eng Kareem
- * @Version        : 3.0.0
+ * @Version        : 3.1.0
  * @Company        : STMicroelectronics
  *===================================================================================
  * 
