@@ -1,8 +1,39 @@
+# Project Build Instructions
+
+To build and execute the project, follow these steps:
+
+1. Compile the source files with the following command:
+   ```
+   gcc -g HMM.c Example_Test.c -o hmm_example
+   ```
+
+2. Run the compiled program with:
+   ```
+   ./hmm_example
+   ```
+
+# Flow of API usage
+
+![image](https://github.com/user-attachments/assets/1e4b7944-3920-42d9-95fb-1806e94cadd9)
+
+
+
+# Flow chart of HmmFree API
+
+![image](https://github.com/user-attachments/assets/c70137c3-448a-4406-8b8e-18bc4ec434e8)
+
+# Flow chart of HmmAlloc API
+
+![image](https://github.com/user-attachments/assets/d5cf5408-c583-40dd-bbc8-9b81ac81c01f)
+
+
+
 # System Design Requirements
 
 ## Model of Heap:
 1- We model Heap as char heap[HEAP_LMIT_SIZE]; which is a very big global array of chars that is declared before main.
-2- We model Program Break pointer as ProgramBreak_Ptr which is initialized as char *ProgramBreak_Ptr = heap;
+2- We model Program Break pointer as ProgramBreak_Ptr which is initialized as char 
+   *ProgramBreak_Ptr = heap;
 
 ## Circular Linked List implementation to track free memory blocks in heap:
 1- Structure:
@@ -12,7 +43,8 @@
 * Next int pointer NextFree_Ptr that points to the next Free memory block.
 
 2- Head:
-* Head pointer is a global pointer, that points to the first free memory block(That contains the least memory address).
+* Head pointer is a global pointer, that points to the first free memory block(That contains the 
+  least memory address).
 * The Head should point to the beginning of Metadata of the first free memory block.
 * If lower address free block is entered, The head should points to it.
 
@@ -20,11 +52,13 @@
 * The free memory blocks nodes must be ordered in ascending order,
   Example: Three memory blocks exists in the linked list, From address (heap+100) to (heap+200), 
   From address (heap+400) to (heap+700), From address (heap+1000) to (heap+1200).
-  if we want to insert a free memory block that its address range is from address (heap+800) to (heap+900),
-  The the new linked List should be like that:
-  (heap+100) to (heap+200), (heap+400) to (heap+700), (heap+800) to (heap+900), (heap+1000) to (heap+1200).
+  if we want to insert a free memory block that its address range is from address (heap+800) to 
+  (heap+900), The the new linked List should be like that:
+  (heap+100) to (heap+200), (heap+400) to (heap+700), (heap+800) to (heap+900), (heap+1000) to 
+  (heap+1200).
 * For any new free memory block, The size of this free block must be stored in MetaData of this node and the least bit in MetaData must set to 1.
-* For any new inserted free block the linked list must make sure if there is any free blocks that are contigous to merge them in one free block.
+* For any new inserted free block the linked list must make sure if there is any free blocks that 
+  are contigous to merge them in one free block.
 
 4- FreeMemoryBlocks_LinkedList elements actual storage :
 * All informations like previous free pointer, Next free pointer and Metadata, are stored in heap memory-
