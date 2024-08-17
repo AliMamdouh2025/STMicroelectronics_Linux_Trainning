@@ -12,9 +12,17 @@ To build and execute the project, follow these steps:
    ./hmm_example
    ```
 
+
+
+
+
+
 # Flow of API usage
 
 ![image](https://github.com/user-attachments/assets/1e4b7944-3920-42d9-95fb-1806e94cadd9)
+
+
+
 
 
 
@@ -22,9 +30,16 @@ To build and execute the project, follow these steps:
 
 ![image](https://github.com/user-attachments/assets/c70137c3-448a-4406-8b8e-18bc4ec434e8)
 
+
+
+
+
 # Flow chart of HmmAlloc API
 
 ![image](https://github.com/user-attachments/assets/d5cf5408-c583-40dd-bbc8-9b81ac81c01f)
+
+
+
 
 
 
