@@ -114,7 +114,6 @@ To build and execute the project, follow these steps:
 1- HmmFree call: 
 * we should see the metadata location by decremnting the pointer, then cast this address to structure-
   of FreeMemoryBlocks_LinkedList(Metadata, PreviousFree_Ptr, NextFree_Ptr).
-* PreviousFree_Ptr and NextFree_Ptr should be initialized with Head.
 * Insert this free node to FreeMemoryBlocks_LinkedList.
 
 
