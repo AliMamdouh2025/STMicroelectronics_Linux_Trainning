@@ -5,7 +5,7 @@
  * @brief          : Header internal interface of Heap manager, The code is split into public (HMM.h) and internal (HMM_internal.h) headers, 
  *                   separating the interface from the implementation details.
  * @Reviewer       : Eng Reda
- * @Version        : 1.0.0
+ * @Version        : 2.0.0
  *===================================================================================
  * 
  *===================================================================================
@@ -48,7 +48,7 @@
  * the block's status.
  *
  */
-#define IS_FREE_MASK             0x1
+#define IS_FREE_MASK             (1ULL << (sizeof(size_t) * 8 - 1))
 
 
 /**
@@ -58,11 +58,8 @@
  * from the block's metadata. It clears the bit used for indicating whether the
  * block is free or allocated, leaving only the size information.
  *
- * @constant SIZE_MASK
- * @value (~IS_FREE_MASK)
  */
 #define SIZE_MASK                (~IS_FREE_MASK)
-
 
 #define FACTOR_OF_ALLOCATION     0x09
 
@@ -81,6 +78,7 @@ typedef struct block_metadata
     struct block_metadata* next; // Pointer to the next block in the free list
     unsigned int magic;          // Magic number for integrity check
 } block_metadata_t;
+
 
 
 
