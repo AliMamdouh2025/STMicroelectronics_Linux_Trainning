@@ -1,15 +1,10 @@
-# Project Build Instructions
+# Project Build Test Example
 
-To build and execute the project, follow these steps:
+To build and execute the Test, follow these steps:
 
-1. Compile the source files with the following command:
+1. Compile and run the source example tet files with the following command:
    ```
-   gcc -g HMM.c Example_Test.c -o hmm_example
-   ```
-
-2. Run the compiled program with:
-   ```
-   ./hmm_example
+   gcc -g HMM.c stress_test.c -o hmm_example && ./hmm_example 
    ```
 
 
