@@ -2,7 +2,7 @@
 
 To build and execute the Test, follow these steps:
 
-1. Compile and run the source example tet files with the following command:
+1. Compile and run the source example test files with the following command:
    ```
    gcc -g HMM.c stress_test.c -o hmm_example && ./hmm_example 
    ```
