@@ -32,17 +32,17 @@
  ============================================================================*/
 // Defines the total size of the heap memory managed by the heap manager.
 // 1048576 bytes (1 MB) is a typical size used for testing or small-scale applications.
-#define HEAP_SIZE          1048576  // 1 MB
+#define HEAP_SIZE          1000000000 
 
 // Specifies the minimum allocation size that the heap manager will handle.
 // Any request for memory allocation smaller than this will be rounded up to this size.
 // The reason is to reduce overhead and EXTERNAL fragmentation as possible
-#define MIN_ALLOC_SIZE     8 // 64-bit processor
+#define MIN_ALLOC_SIZE     16 // 64-bit processor
 
 // Defines the alignment requirement for memory blocks allocated by the heap manager.
 // For Example: 10 bytes would be rounded up to size of 16 bytes (since 16 is the nearest multiple of 8 greater than 10)-
 // The additional 6 bytes are not wasted; they are a trade-off to ensure that the next allocation also starts at an aligned address.
-#define ALIGNMENT          8 // 64-bit processor
+#define ALIGNMENT          16 // 64-bit processor
 
 /** This ensures that no single allocation exceeds a manageable size, 
  *  which could prevent over-committing memory or could be used for optimizing memory management algorithms.
@@ -50,7 +50,7 @@
  * It may also serve as a safeguard to ensure that any requests for memory allocation exceeding SIZE_MAX
  * are either handled differently or flagged as an error.
  */
-#define SIZE_MAX                  10000
+#define SIZE_MAX         10000
 
 
 
