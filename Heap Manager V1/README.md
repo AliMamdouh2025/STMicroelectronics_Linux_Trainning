@@ -45,7 +45,7 @@ To build and execute the Test, follow these steps:
 2- We model Program Break pointer as ProgramBreak_Ptr which is initialized as char 
    *ProgramBreak_Ptr = heap;
 
-## Circular Linked List implementation to track free memory blocks in heap:
+# Linked List implementation to track free memory blocks in heap:
 1- Structure:
 * Metadata(takes size of unsigned int)  that contains the size of free memory block Node, and the-
   least bit of Metadata is 0 if it is non-free block, and 1 if it is free block.
