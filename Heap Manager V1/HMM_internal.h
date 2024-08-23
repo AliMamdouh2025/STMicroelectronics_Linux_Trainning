@@ -5,7 +5,7 @@
  * @brief          : Header internal interface of Heap manager, The code is split into public (HMM.h) and internal (HMM_internal.h) headers, 
  *                   separating the interface from the implementation details.
  * @Reviewer       : Eng Reda
- * @Version        : 2.0.0
+ * @Version        : 2.1.0
  *===================================================================================
  * 
  *===================================================================================
