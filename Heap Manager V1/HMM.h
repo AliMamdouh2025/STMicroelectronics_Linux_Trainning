@@ -4,7 +4,7 @@
  * @author         : Ali Mamdouh
  * @brief          : Header interface of Heap manager
  * @Reviewer       : Eng Reda
- * @Version        : 2.0.0
+ * @Version        : 2.1.0
  *===================================================================================
  * 
  *===================================================================================
@@ -30,9 +30,18 @@
 /*============================================================================
  *****************************  Config Macros  *******************************
  ============================================================================*/
-// Defines the total size of the heap memory managed by the heap manager.
-// 1048576 bytes (1 MB) is a typical size used for testing or small-scale applications.
-#define HEAP_SIZE          1000000000 
+/**
+ * Defines the size by which the heap is expanded when additional memory is needed.
+ *
+ * This macro specifies the amount of memory (in bytes) that the heap will be increased
+ * by each time a heap expansion is required. This ensures that the heap grows in large chunks to reduce the frequency of expansion
+ * operations and improve memory management efficiency.
+ *
+ * A larger expansion size can help to minimize the overhead associated with frequent
+ * heap expansions and reduce fragmentation by allocating a substantial block of memory
+ * at once.
+ */
+#define HEAP_EXPAND_SIZE   (1024 * 1024)  // 1 MB expansion size
 
 // Specifies the minimum allocation size that the heap manager will handle.
 // Any request for memory allocation smaller than this will be rounded up to this size.
@@ -44,13 +53,7 @@
 // The additional 6 bytes are not wasted; they are a trade-off to ensure that the next allocation also starts at an aligned address.
 #define ALIGNMENT          16 // 64-bit processor
 
-/** This ensures that no single allocation exceeds a manageable size, 
- *  which could prevent over-committing memory or could be used for optimizing memory management algorithms.
- *
- * It may also serve as a safeguard to ensure that any requests for memory allocation exceeding SIZE_MAX
- * are either handled differently or flagged as an error.
- */
-#define SIZE_MAX         10000
+
 
 
 
@@ -92,6 +95,12 @@ hmm_error_t hmm_get_last_error(void);
 void hmm_set_allocation_algorithm(hmm_alloc_algorithm_t algorithm);
 void hmm_init(void);
 void hmm_cleanup(void);
+
+// standard memory function declarations
+void* malloc(size_t size);
+void free(void* ptr);
+void* calloc(size_t nmemb, size_t size);
+void* realloc(void* ptr, size_t size);
 
 #endif // HMM_H
 
