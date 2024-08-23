@@ -22,7 +22,7 @@
 #include <string.h>            // Include the string library to use functions like `memset`, which is used in the project to initialize memory.
 #include <assert.h>            // Include the assert library to enable the use of the `assert` macro, which helps in debugging by checking assumptions made in the code.
 #include <stdio.h>             // Include the standard input-output library to use functions like `printf` for debugging and displaying messages to the console.
-#include <unistd.h>
+#include <unistd.h>            // Include it for system calls
 
 
 
