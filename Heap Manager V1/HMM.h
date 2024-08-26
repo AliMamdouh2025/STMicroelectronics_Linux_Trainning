@@ -41,17 +41,17 @@
  * heap expansions and reduce fragmentation by allocating a substantial block of memory
  * at once.
  */
-#define HEAP_EXPAND_SIZE   (1024 * 1024)  // 1 MB expansion size
+#define HEAP_EXPAND_SIZE   (1024 * 1024)  // 1MB expansion size
 
 // Specifies the minimum allocation size that the heap manager will handle.
 // Any request for memory allocation smaller than this will be rounded up to this size.
 // The reason is to reduce overhead and EXTERNAL fragmentation as possible
-#define MIN_ALLOC_SIZE     16 // 64-bit processor
+#define MIN_ALLOC_SIZE     40 // 64-bit processor, is 32 to take care of metadata
 
 // Defines the alignment requirement for memory blocks allocated by the heap manager.
 // For Example: 10 bytes would be rounded up to size of 16 bytes (since 16 is the nearest multiple of 8 greater than 10)-
 // The additional 6 bytes are not wasted; they are a trade-off to ensure that the next allocation also starts at an aligned address.
-#define ALIGNMENT          16 // 64-bit processor
+#define ALIGNMENT          8 // 64-bit processor
 
 
 
@@ -96,11 +96,14 @@ void hmm_set_allocation_algorithm(hmm_alloc_algorithm_t algorithm);
 void hmm_init(void);
 void hmm_cleanup(void);
 
-// standard memory function declarations
+// Standard memory function declarations
 void* malloc(size_t size);
 void free(void* ptr);
 void* calloc(size_t nmemb, size_t size);
 void* realloc(void* ptr, size_t size);
+
+// Debug Functions
+void print_free_list(void);
 
 #endif // HMM_H
 
