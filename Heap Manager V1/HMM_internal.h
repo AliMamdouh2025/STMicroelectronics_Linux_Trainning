@@ -74,9 +74,9 @@
 typedef struct block_metadata 
 {
     size_t size_and_flags;       // Size of the block and status flags
+    unsigned long magic;          // Magic number for integrity check
     struct block_metadata* prev; // Pointer to the previous block in the free list
     struct block_metadata* next; // Pointer to the next block in the free list
-    unsigned int magic;          // Magic number for integrity check
 } block_metadata_t;
 
 
