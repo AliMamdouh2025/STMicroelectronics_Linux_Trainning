@@ -18,19 +18,11 @@
  ******************************  Includes  ***********************************
  ============================================================================*/ 
 #include "HMM.h"              // Include the public header file for the heap manager, which contains the API declarations.
-#include "HMM_internal.h"      // Include the internal header file for the heap manager, which contains internal data structures and helper function declarations.
-#include <string.h>            // Include the string library to use functions like `memset`, which is used in the project to initialize memory.
-#include <assert.h>            // Include the assert library to enable the use of the `assert` macro, which helps in debugging by checking assumptions made in the code.
-#include <stdio.h>             // Include the standard input-output library to use functions like `printf` for debugging and displaying messages to the console.
-#include <unistd.h>            // Include it for system calls
-
-
-
-
-
-/*============================================================================
- *****************************  Config Macros  *******************************
- ============================================================================*/
+#include "HMM_internal.h"     // Include the internal header file for the heap manager, which contains internal data structures and helper function declarations.
+#include <string.h>           // Include the string library to use functions like `memset`, which is used in the project to initialize memory.
+#include <assert.h>           // Include the assert library to enable the use of the `assert` macro, which helps in debugging by checking assumptions made in the code.
+#include <stdio.h>            // Include the standard input-output library to use functions like `printf` for debugging and displaying messages to the console.
+#include <unistd.h>           // Include for system calls
 
 
 
@@ -330,7 +322,7 @@ void hmm_remove_from_free_list(block_metadata_t* block)
  */
 void* hmm_internal_alloc(size_t size) 
 {
-    if(size == 0) return NULL; 
+    //if(size == 0) return NULL; 
 
     size = ((size + ALIGNMENT - 1) / ALIGNMENT) * ALIGNMENT;
 
@@ -347,7 +339,7 @@ void* hmm_internal_alloc(size_t size)
     hmm_split_block(block, size);
 
     
-    return (void*)(block + 1); // which is equivelent to ((block_metadata_t*)block+1), So user write to its dedicated space
+    return (void*)(block + 1); // Try to overwrite pointer
 }
 
 
@@ -395,8 +387,10 @@ void hmm_internal_free(void* ptr)
         last_error = HMM_ERROR_INVALID_POINTER;
         return;
     }
+
     
-    if (block->size_and_flags & IS_FREE_MASK) {
+    if (block->size_and_flags & IS_FREE_MASK)
+    {
         last_error = HMM_ERROR_DOUBLE_FREE;
         return;
     }
@@ -454,11 +448,20 @@ void hmm_internal_free(void* ptr)
  */
 void hmm_coalesce(block_metadata_t* block) 
 {
+
+    assert(block != NULL); /////////////////////////////////////////////////////////////////////////////////////////////////////////////////debug
+    assert(block->magic == MAGIC_NUMBER);  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////debug
+    assert(block->size_and_flags & IS_FREE_MASK); /////////////////////////////////////////////////////////////////////////////////////////////////////////////////debug
+
+
     // Start from the head of the free list
     block_metadata_t* curr = free_list_head;
 
     while (curr != NULL) 
     {
+
+        assert(block->magic == MAGIC_NUMBER);  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////debug
+        assert(block->size_and_flags & IS_FREE_MASK); /////////////////////////////////////////////////////////////////////////////////////////////////////////////////debug
         block_metadata_t* next = curr->next;
 
         // Check if the current block is immediately before the freed block
@@ -538,9 +541,9 @@ void hmm_split_block(block_metadata_t* block, size_t size)
 {
     // Calculate the size of the original block
     size_t block_size = block->size_and_flags & SIZE_MASK;
-    
+
     // Check if the block can be split
-    if (block_size - size >= MIN_ALLOC_SIZE + sizeof(block_metadata_t)) 
+    if (block_size - size >=  MIN_ALLOC_SIZE + sizeof(block_metadata_t))
     {
         // Create a new block with the remaining memory
         block_metadata_t* new_block = (block_metadata_t*)((char*)block + sizeof(block_metadata_t) + size);
@@ -559,7 +562,14 @@ void hmm_split_block(block_metadata_t* block, size_t size)
 
         // Remove allocated block from free list
         hmm_remove_from_free_list(block);
+    }
+    else
+    {
+        // Set 0 to status bit to mark block as allocated block
+        block->size_and_flags = size & SIZE_MASK;
 
+        // Remove Allocated block from free list
+        hmm_remove_from_free_list(block);
     }
 }
 
@@ -719,7 +729,9 @@ void HmmFree(void* ptr)
         //printf("Invalid magic number or you enter invalid pointer\n");
         return;
     }
-    
+
+   // printf("Inside HMM.c At line 725: Last Error Code is %d\n", hmm_get_last_error());//////////////////////////////////////////////////debug
+
     // Check if the block is already marked as free
     // If so, it indicates a double free attempt
     if (block->size_and_flags & IS_FREE_MASK) 
@@ -730,7 +742,7 @@ void HmmFree(void* ptr)
     }
     
     // Call the internal free function to handle the actual deallocation
-    hmm_internal_free(ptr);
+    hmm_internal_free(block);
 }
 
 
@@ -929,6 +941,61 @@ void* realloc(void* ptr, size_t size)
 
 
 
+
+/*============================================================================
+ ****************************  Debug Functions  ******************************
+ ============================================================================*/ 
+
+/**
+ * Prints the logs of the free list.
+ *
+ * This function iterates through the free list, which is a linked list of
+ * memory blocks that are currently free. For each block, it prints the node
+ * number, the address of the block, the size of the block, the addresses of
+ * the previous and next blocks in the list, the magic number used for block
+ * integrity verification, and whether the block is marked as free.
+ *
+ * The output is formatted in a table-like structure with column headers to
+ * provide clear and organized information about each block in the free list.
+ * The function also prints the total number of free nodes at the end.
+ *
+ */
+void print_free_list(void) 
+{
+    // Start at the head of the free list
+    block_metadata_t* current = free_list_head;
+    int count = 0;
+
+    // Print the header for the free list contents
+    printf("\n===== Free List Contents =====\n");
+    printf("%-5s %-15s %-10s %-15s %-15s %-10s %-10s\n", 
+           "Node", "Address", "Size", "Prev", "Next", "Magic", "     Is Free");
+    printf("-------------------------------------------------------------------------------------------------------------\n");
+
+    // Iterate over each block in the free list
+    while (current != NULL) 
+    {
+        count++; // Increment the node count
+
+        // Print the details of the current block
+        printf("%-5d 0x%-13lx %-10llu 0x%-13lx 0x%-13lx 0x%-13lx %-10s\n",
+               count,
+               (unsigned long)current,  // Current block's address
+               (current->size_and_flags & SIZE_MASK),  // Block size (masked)
+               (unsigned long)current->prev,  // Address of the previous block
+               (unsigned long)current->next,  // Address of the next block
+               (unsigned long)current->magic,  // Magic number for integrity check
+               (current->size_and_flags & IS_FREE_MASK) ? "Yes" : "No");  // Free status
+
+        // Move to the next block in the list
+        current = current->next;
+    }
+
+    // Print the footer and total count of free nodes
+    printf("---------------------------------------------------------------------------------------------------------------\n");
+    printf("Total free nodes: %d\n", count);
+    printf("================================\n\n");
+}
 
 
 
