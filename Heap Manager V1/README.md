@@ -114,7 +114,7 @@ To build and execute the Test, follow these steps:
 
 
 
-# Video of HMM:
+# Video of HMM
 https://drive.google.com/file/d/1_a6XVa3fa6EyzLocqxJtmy3nMUZ887dn/view?usp=sharing
 
 # Video Of Fixing Corruption Bug
