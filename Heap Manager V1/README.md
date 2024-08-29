@@ -9,6 +9,36 @@ To build and execute the Test, follow these steps:
 
 
 
+### Testing Custom Heap Implementation on Bash
+
+Follow these steps to test the custom heap implementation using a shared library:
+
+1. **Compile the Custom Heap as a Shared Library**  
+   Use the following command to compile the `HMM.c` file into a shared library:
+   ```bash
+   gcc -shared -fPIC -o libhmm.so HMM.c
+   ```
+
+2. **Make the Bash Script Executable**  
+   Grant execute permissions to the `use_hmm.sh` script:
+   ```bash
+   chmod +x use_hmm.sh
+   ```
+
+3. **Run the Bash Script**  
+   Execute the script to start using the custom heap implementation:
+   ```bash
+   ./use_hmm.sh
+   ```
+
+4. **Exit the Custom Bash Environment**  
+   To exit the Bash session that uses the custom heap implementation, type:
+   ```bash
+   exit
+   ```
+
+--- 
+
 
 
 
