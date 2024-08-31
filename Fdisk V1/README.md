@@ -31,7 +31,7 @@ This project implements a simplified version of the `fdisk -l` command, designed
 To compile the program, navigate to the project directory and run:
 
 ```bash
-gcc -o myfdisk main.c MBR.c GPT.c -I.
+gcc myfdisk.c GPT_Parsing.c MBR_Parsing.c -o myfdisk
 ```
 
 ## Usage
