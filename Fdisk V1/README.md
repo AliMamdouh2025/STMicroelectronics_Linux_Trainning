@@ -1,5 +1,4 @@
 
-```markdown
 # Disk Partition Viewer
 
 ## Description
@@ -46,6 +45,10 @@ sudo ./myfdisk /dev/sdX
 Replace `/dev/sdX` with the device you want to examine (e.g., `/dev/sda`, `/dev/nvme0n1`).
 
 ## Example Output
+![image](https://github.com/user-attachments/assets/802f2825-3d2e-4d6f-954d-3f8e9cea84bb)
+
+![image](https://github.com/user-attachments/assets/0adcf53a-88e7-4c7b-9572-f468191ca478)
+
 
 
 
