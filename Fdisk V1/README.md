@@ -45,6 +45,7 @@ sudo ./myfdisk /dev/sdX
 Replace `/dev/sdX` with the device you want to examine (e.g., `/dev/sda`, `/dev/nvme0n1`).
 
 ## Example Outputs
+![image](https://github.com/user-attachments/assets/a3306e4e-2521-40d9-9f01-360b454445fd)
 
 ![image](https://github.com/user-attachments/assets/0adcf53a-88e7-4c7b-9572-f468191ca478)
 
