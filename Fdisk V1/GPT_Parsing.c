@@ -1,10 +1,9 @@
-/**
- *===================================================================================
+ /*===================================================================================
  * @file           : GPT_Parsing.c
  * @author         : Ali Mamdouh
  * @brief          : source of GPT_Parsing
  * @Reviewer       : Eng Reda
- * @Version        : 1.0.0
+ * @Version        : 2.0.0
  *===================================================================================
  * 
  *===================================================================================
@@ -17,35 +16,9 @@
 /*============================================================================
  ******************************  Includes  ***********************************
  ============================================================================*/ 
-#include "GPT_Parsing.h"
+#include "GPT_Parsing.h" // Includes the custom header file for GPT parsing functionalities (e.g., data structures, function declarations for handling GPT)
 
 
-
-
-
-/*============================================================================
- *************************  Variable Initialization  *************************
- ============================================================================*/ 
-GPT_PartitionType partition_types[] = 
-{
-    {"EBD0A0A2-B9E5-4433-87C0-68B6B72699C7", "Microsoft basic data"},               // Microsoft basic data
-    {"C12A7328-F81F-11D2-BA4B-00A0C93EC93B", "EFI System"},                         // EFI System
-    {"E3C9E316-0B5C-4DB8-817D-F92DF00215AE", "Microsoft reserved"},                 // Microsoft reserved
-    {"DE94BBA4-06D1-4D40-A16A-BFD50179D6AC", "Windows recovery environment"},       // Windows recovery environment
-    {"0FC63DAF-8483-4772-8E79-3D69D8477DE4", "Linux filesystem"},                   // Linux filesystem
-    {"A19D880F-05FC-4D3B-A006-743F0F84911E", "Linux swap"},                        // Linux swap
-    {"48465300-0000-11AA-AA11-00306543ECAC", "Apple HFS+"},                        // Apple HFS+
-    {"426F6F74-0000-11AA-AA11-00306543ECAC", "Apple Boot"},                         // Apple Boot
-    {"21686148-6449-48D9-BC8D-4D8FBD6D1B3F", "BIOS Boot"},                         // BIOS Boot
-    {"C6E9E2E0-8D14-11E8-B83E-1C1B7F13E7F8", "Linux RAID"},                       // Linux RAID
-    {"D9E5C4A2-8F9F-4F16-93F8-228EF7E6D0F3", "Linux LVM"},                        // Linux LVM
-    {"6A30D3D8-B6A2-4D23-B0F7-FD9B47F64E3A", "Windows Data Partition"},            // Windows Data Partition
-    {"7C3457A4-8C28-4F9D-8358-0F5C2B3E2CF2", "Windows Recovery Partition"},        // Windows Recovery Partition
-    {"F4E1D80E-FDF3-4F12-90CE-F3F97924E1A0", "HP-UX Data"},                       // HP-UX Data
-    {"3B8F8E50-3E3A-4F1F-9A77-5B58D4D6F5A6", "Solaris Boot"},                     // Solaris Boot
-    {"EBD0A0A2-B9E5-4433-87C0-68B6B72699C7", "Microsoft basic data"},               // Duplicate entry for clarity
-    {NULL, NULL}  // End of array marker
-};
 
 
 
@@ -54,190 +27,199 @@ GPT_PartitionType partition_types[] =
  ******************************  Functions  **********************************
  ============================================================================*/
 /**
- * Formats a byte as a two-digit hexadecimal string.
+ * GPT Partition Type Array
  *
- * This helper function converts a single byte into its corresponding
- * two-digit hexadecimal representation and stores the result in the
- * provided buffer. The buffer should be large enough to hold at least
- * two characters plus a null terminator.
+ * This array defines known GUID Partition Table (GPT) partition types by associating 
+ * their GUID (Globally Unique Identifier) with a human-readable description. 
+ * These partition types correspond to different filesystems, boot partitions, 
+ * and other utilities commonly used in GPT-based partition tables.
  *
- * @param byte: The byte value to be formatted. This should be an 8-bit
- *              unsigned integer (0-255).
- * @param buffer: A pointer to a buffer where the formatted hexadecimal
- *                string will be stored. The buffer should be at least
- *                3 bytes long to accommodate the two-digit hex value and
- *                the null terminator.
+ * The GUIDs used in GPT are globally unique 128-bit numbers, and they define the
+ * type of partition as well as the filesystem or operating system it belongs to.
+ * 
+ * The following table lists common GPT partition types:
  *
- * @note The buffer is expected to be properly allocated and have enough
- *       space to store the formatted string. If the buffer is too small,
- *       it may lead to buffer overflow and undefined behavior.
+ * - Microsoft basic data: Used for Windows filesystems (e.g., NTFS, FAT32)
+ * - EFI System: Contains the boot loader for UEFI systems
+ * - Microsoft reserved: Reserved partition for Windows systems
+ * - Windows recovery environment: Recovery partition for Windows
+ * - Linux filesystem: Common partition for Linux filesystems (e.g., ext4)
+ * - Linux swap: Used for swap space in Linux
+ * - Apple HFS+: Filesystem used in macOS before APFS
+ * - Apple Boot: Boot partition used by macOS systems
+ * - VMware VMFS: Filesystem used in VMware environments
+ * - Apple APFS: Apple's newer filesystem, used in macOS High Sierra and later
+ * - BIOS boot partition: Partition used for BIOS booting on GPT systems
+ * - MBR partition scheme: Protective MBR for backward compatibility
+ * - Intel Fast Flash: Used by Intel for fast flash technologies
+ * - Lenovo boot partition: Specific boot partition used by Lenovo devices
+ *
+ * @param guid: The partition type GUID as a string.
+ * @param description: Human-readable description of the partition type.
  */
-static void format_byte_as_hex(uint8_t byte, char *buffer) 
+GPT_PartitionType partition_types[] = 
 {
-    sprintf(buffer, "%02X", byte);
-}
+    {"EBD0A0A2-B9E5-4433-87C0-68B6B72699C7", "Microsoft basic data"},
+    {"C12A7328-F81F-11D2-BA4B-00A0C93EC93B", "EFI System"},
+    {"E3C9E316-0B5C-4DB8-817D-F92DF00215AE", "Microsoft reserved"},
+    {"DE94BBA4-06D1-4D40-A16A-BFD50179D6AC", "Windows recovery environment"},
+    {"0FC63DAF-8483-4772-8E79-3D69D8477DE4", "Linux filesystem"},
+    {"A19D880F-05FC-4D3B-A006-743F0F84911E", "Linux swap"},
+    {"48465300-0000-11AA-AA11-00306543ECAC", "Apple HFS+"},
+    {"426F6F74-0000-11AA-AA11-00306543ECAC", "Apple Boot"},
+    {"AA31E02A-400F-11DB-9590-000C2911D1B8", "VMware VMFS"},
+    {"9D275380-40AD-11DB-BF97-000C2911D1B8", "VMware reserved"},
+    {"7C3457EF-0000-11AA-AA11-00306543ECAC", "Apple APFS"},
+    {"21686148-6449-6E6F-744E-656564454649", "BIOS boot partition"},
+    {"024DEE41-33E7-11D3-9D69-0008C781F39F", "MBR partition scheme"},
+    {"D3BFE2DE-3DAF-11DF-BA40-E3A556D89593", "Intel Fast Flash"},
+    {"7412F7D5-A156-4B13-81DC-867174929325", "Lenovo boot partition"},
+    {NULL, NULL}
+};
+
+
+
+
+
 
 
 
 /**
- * Converts a GUID to its string representation in standard UUID format.
+ * Converts a 16-byte binary GUID into its standard string representation.
  *
- * This function takes a GUID (Globally Unique Identifier) represented as
- * an array of 16 bytes and converts it into a string formatted as a UUID
- * (Universally Unique Identifier) in the canonical 8-4-4-4-12 hexadecimal
- * format. The resulting string is stored in the provided buffer.
+ * The GUID is provided in binary form, which needs to be interpreted in both
+ * little-endian and big-endian formats as specified in the UUID standard. The
+ * resulting string is formatted as XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX.
  *
- * The GUID is formatted according to the following structure:
- *  - First 4 bytes: Little-endian order
- *  - Next 2 bytes: Little-endian order
- *  - Next 2 bytes: Little-endian order
- *  - Next 2 bytes: Big-endian order (no change)
- *  - Last 6 bytes: Big-endian order (no change)
- *
- * The output string is 36 characters long plus a null terminator (total 37 bytes).
- *
- * @param guid: A pointer to an array of 16 bytes representing the GUID.
- *              The array must be properly initialized and not NULL.
- * @param guid_str: A pointer to a buffer where the formatted GUID string
- *                  will be stored. The buffer should be at least 37 bytes
- *                  in size to accommodate the formatted string and null terminator.
- *
- * @note The function performs basic NULL pointer checks. If either parameter
- *       is NULL, an error message is printed to stderr, and the function returns
- *       without modifying the buffer. Ensure that the provided buffer is
- *       sufficiently large to prevent buffer overflow.
+ * @param guid: Pointer to the 16-byte binary GUID.
+ * @param guid_str: Buffer to store the resulting GUID string. Must be at least 37 characters long.
+ * @return: Returns true if successful, false if inputs are invalid.
  */
-void convert_guid_to_string(const unsigned char *guid, char *guid_str) 
+bool convert_guid_to_string(const unsigned char *guid, char *guid_str) 
 {
+    // Validate input parameters
     if (guid == NULL || guid_str == NULL) 
     {
-        fprintf(stderr, "Error: NULL pointer provided to convert_guid_to_string.\n");
-        return;
+        fprintf(stderr, "Invalid input: guid and guid_str cannot be NULL\n");
+        return false;
     }
 
-    // Format the GUID into the string representation
-    snprintf(guid_str, 37,  // GUID string is 36 characters + null terminator
-             "%02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
-             // Little-endian order for first 8 bytes
-             guid[3], guid[2], guid[1], guid[0], // First 4 bytes
-             guid[5], guid[4],                   // Next 2 bytes
-             guid[7], guid[6],                   // Next 2 bytes
-             guid[8], guid[9],                   // Next 2 bytes
-             guid[10], guid[11], guid[12], guid[13], guid[14], guid[15]); // Last 6 bytes
+    // Convert the GUID binary data to a string format (XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX)
+    sprintf(guid_str,
+            "%02X%02X%02X%02X-"    // First group (little-endian, 4 bytes)
+            "%02X%02X-"            // Second group (little-endian, 2 bytes)
+            "%02X%02X-"            // Third group (little-endian, 2 bytes)
+            "%02X%02X-"            // Fourth group (big-endian, 2 bytes)
+            "%02X%02X%02X%02X%02X%02X",  // Fifth group (big-endian, 6 bytes)
+            guid[3], guid[2], guid[1], guid[0],   // Little-endian conversion
+            guid[5], guid[4],                     // Little-endian conversion
+            guid[7], guid[6],                     // Little-endian conversion
+            guid[8], guid[9],                     // Big-endian, no conversion needed
+            guid[10], guid[11], guid[12], guid[13], guid[14], guid[15]);  // Big-endian, no conversion needed
+
+    return true;
 }
 
 
 
 
-/**
- * Checks if a GUID prefix matches a known partition type.
- *
- * @param guid_prefix: The GUID prefix to match.
- * @param partition_type: The partition type structure to check against.
- * @return 1 if the prefix matches, otherwise 0.
- */
-static int is_guid_prefix_match(const char *guid_prefix, const GPT_PartitionType *partition_type) 
-{
-    return strncmp(partition_type->guid_prefix, guid_prefix, strlen(partition_type->guid_prefix)) == 0;
-}
+
+
 
 
 
 
 /**
- * Maps the obtained GUID to the suitable GPT partition type.
+ * Maps a GUID string to the corresponding GPT partition type.
  *
- * This function compares the given GUID prefix with known partition types
- * and returns a human-readable name for the matched type. If no match is found,
- * it returns "Unknown Type".
+ * This function takes a GUID string and searches the partition_types array for a match.
+ * If the GUID matches a known type, it returns the corresponding partition name.
+ * If no match is found, it returns "Unknown Type".
  *
- * @param type_guid: The GUID prefix to be matched.
- * @return A string representing the partition type name, or "Unknown Type" if no match is found.
+ * @param type_guid: A string representing the GUID of the partition type.
+ * @return: A string describing the partition type, or "Unknown Type" if no match is found.
  */
 const char* GPT_get_partition_type(const char *type_guid) 
 {
+    // Validate the input parameter
     if (type_guid == NULL) 
     {
-        return "Invalid GUID";  // Handle NULL pointer for type_guid
+        fprintf(stderr, "Error: Invalid input - type_guid cannot be NULL\n");
+        return "Invalid GUID";
     }
 
+    // Ensure the input GUID string is of valid length
+    if (strlen(type_guid) != GUID_LEN) 
+    {
+        fprintf(stderr, "Error: Invalid GUID length\n");
+        return "Invalid GUID";
+    }
+
+    // Iterate through the known partition types and check for a match
     for (int i = 0; partition_types[i].guid_prefix != NULL; i++) 
     {
-        if (is_guid_prefix_match(type_guid, &partition_types[i])) 
+        // Compare the GUID prefixes
+        if (strncmp(partition_types[i].guid_prefix, type_guid, GUID_LEN) == GUID_STRING_MATCH) 
         {
-            return partition_types[i].name;
+            return partition_types[i].name;  // Return the matching partition type
         }
     }
 
+    // If no match is found, return "Unknown Type"
     return "Unknown Type";  
 }
 
 
 
 
-/**
- * Checks if the partition entry represents an empty partition.
- * 
- * @param entry: Pointer to the GPT partition entry.
- * @return 1 if the partition is empty, 0 otherwise.
- */
-static int is_partition_empty(const GPT_PartitionEntry *entry) 
-{
-    return (entry->starting_lba == 0 && entry->ending_lba == 0);
-}
+
+
 
 /**
- * Formats the partition size in sectors to megabytes.
- * 
- * @param start_lba: Starting LBA of the partition.
- * @param end_lba: Ending LBA of the partition.
- * @return Size of the partition in megabytes.
- */
-static uint64_t format_partition_size_in_mb(uint64_t start_lba, uint64_t end_lba) 
-{
-    uint64_t sector_count = end_lba - start_lba + 1;
-    return (sector_count * SECTOR_SIZE) / (1024 * 1024);
-}
-
-/**
- * Prints the information of a GPT partition entry.
+ * Prints information about a GPT partition.
  *
- * @param device: The name of the device (e.g., "/dev/sda").
- * @param index: The partition index.
- * @param entry: Pointer to the GPT partition entry.
+ * This function prints detailed information about a GPT partition entry,
+ * including its start and end LBA, size in megabytes, and partition type.
+ * It skips empty partitions where both starting and ending LBA are zero.
+ *
+ * @param device: The name or identifier of the device where the partition resides.
+ * @param index: The index of the partition.
+ * @param entry: Pointer to the GPT partition entry structure containing partition details.
  */
 void GPT_print_partition_info(const char *device, int index, GPT_PartitionEntry *entry) 
 {
-    if (entry == NULL || device == NULL) 
+    // Validate input parameters
+    if (device == NULL || entry == NULL) 
     {
-        fprintf(stderr, "Error: NULL pointer provided to GPT_print_partition_info.\n");
+        fprintf(stderr, "Error: Invalid input - device or entry cannot be NULL\n");
         return;
     }
 
-    if (is_partition_empty(entry)) 
+    // Skip empty partitions
+    if (entry->starting_lba == 0 && entry->ending_lba == 0) 
     {
-        // Skip empty partitions
-        return;
+        return;  // Empty partition; no information to print
     }
 
-    // Convert the binary GUID to a string
-    char guid_str[ GPT_TYPE_STRING_LENGTH + 1 ];  
+    // Convert GUID to string
+    char guid_str[GUID_STR_LEN]; 
     convert_guid_to_string(entry->type_guid, guid_str);
 
-    // Map the GUID string to the partition type name
+    // Map GUID to partition type
     const char *partition_type = GPT_get_partition_type(guid_str);
 
-    // Calculate partition size in MB
-    uint64_t partition_size_mb = format_partition_size_in_mb(entry->starting_lba, entry->ending_lba);
+    // Calculate size in megabytes
+    uint64_t sector_count = entry->ending_lba - entry->starting_lba + 1;
+    uint64_t size_mb = (sector_count * SECTOR_SIZE) / (1024 * 1024);
 
     // Print partition information
     printf("%-16s%-6d %-10llu %-10llu %-10llu %-10llu %-36s\n",
-           device,
-           index,
-           (unsigned long long)entry->starting_lba,
-           (unsigned long long)entry->ending_lba,
-           (unsigned long long)(entry->ending_lba - entry->starting_lba + 1),
-           (unsigned long long)partition_size_mb,
-           partition_type
-    );
+           device,                         // Device name
+           index,                          // Partition index
+           (unsigned long long)entry->starting_lba,  // Starting LBA
+           (unsigned long long)entry->ending_lba,    // Ending LBA
+           (unsigned long long)sector_count,          // Number of sectors
+           (unsigned long long)size_mb,               // Size in megabytes
+           partition_type                     // Partition type description
+          );
 }
