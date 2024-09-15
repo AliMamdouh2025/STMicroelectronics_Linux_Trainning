@@ -131,4 +131,5 @@ For instance, in the file `set_uid_file`, the upper `T` will appear in the third
 ![image_2024-09-15_02-52-06](https://github.com/user-attachments/assets/32948287-7c5a-4b05-91d6-ecac0fe320e4)
 
 
-
+## Video Explanation
+https://drive.google.com/file/d/16VG9T0pDFV1RBpMKTm7ZQiQ2NTd_E066/view?usp=drive_link
