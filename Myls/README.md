@@ -57,7 +57,7 @@ Replace `[options]` with the desired flags (e.g., `-l`, `-a`), and `[file...]` w
 ![image_2024-09-14_22-38-39](https://github.com/user-attachments/assets/9f17fcd9-6287-4dbb-94dc-ac1591d177c9)
 
 ### Show Inode number(myls -i)
-![image_2024-09-14_22-53-56](https://github.com/user-attachments/assets/a2709346-75bd-4977-90b6-1f34d13a0e96)
+![image](https://github.com/user-attachments/assets/99747fa6-9b77-4925-b9b3-4ce211f4f992)
 
 ### Disable options(myls -f[any other option])
 ![image_2024-09-14_23-42-00](https://github.com/user-attachments/assets/4ea03f6e-cc51-4071-89d0-abf75ac075a1)
