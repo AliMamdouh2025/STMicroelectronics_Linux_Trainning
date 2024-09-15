@@ -107,147 +107,177 @@ int CompareFileNamesAlphabetically(const void *p1, const void *p2)
 
 
 /**
- * Compares two files based on their modification times for sorting.
+ * Compares two files based on their modification times.
  *
- * This function retrieves the modification times of two files and compares them to determine
- * their order. The comparison is done in descending order, meaning more recent modification times
- * come first. If there is an error retrieving the file statistics, the function treats the files
- * as equal. This function is used for sorting files based on their modification time.
+ * This function is used as a comparison function for sorting files by their last 
+ * modification time (st_mtime). It retrieves the modification time for each file 
+ * using the lstat system call. Files with newer modification times are sorted 
+ * before older ones. If the modification times are identical, the files are sorted 
+ * alphabetically by their names.
  *
- * @param p1: A pointer to the first file name (pointer to a pointer to char). The file name 
- *            is used to retrieve and compare the file's modification time.
- * @param p2: A pointer to the second file name (pointer to a pointer to char). The file name 
- *            is used to retrieve and compare the file's modification time.
+ * In case of an error while retrieving file statistics (e.g., if a file does not exist),
+ * the function falls back to alphabetical sorting of the file names.
  *
- * @return: A negative value if the first file's modification time is greater (more recent).
- *          Zero if the modification times are the same.
- *          A positive value if the first file's modification time is less (older).
+ * Additionally, if the modification times (st_mtime) are identical, the function 
+ * compares the nanosecond components (st_mtim.tv_nsec) to determine the order. 
+ * If both the modification times and nanoseconds are identical, the function sorts 
+ * the files alphabetically by their names as a final fallback.
+ *
+ * @param p1: A pointer to the first file's name to be compared. This is passed as a 
+ *            const void * for compatibility with qsort, but it is treated as a pointer
+ *            to a string (const char **).
+ * @param p2: A pointer to the second file's name to be compared. Similar to p1, it is
+ *            cast to a const char **.
+ *
+ * @return: An integer less than, equal to, or greater than zero if the first file should 
+ *          be sorted before, the same as, or after the second file, respectively:
+ *          - A positive value indicates p1 should come before p2.
+ *          - A negative value indicates p2 should come before p1.
+ *          - Zero indicates the files are equal based on the comparison criteria.
  */
 int CompareFileModificationTimes(const void *p1, const void *p2)
 {
     struct stat buf1, buf2;
-
-    /** Cast the arguments back to pointers to char (file names) */
     const char *file1 = *(const char **) p1;
     const char *file2 = *(const char **) p2;
 
-    /** Get file stats for each file */
-    if (lstat(file1, &buf1) < 0) 
+    /* Attempt to retrieve file statistics for both files */
+    if (lstat(file1, &buf1) < 0 || lstat(file2, &buf2) < 0) 
     {
-        printf("stat error for file1: %s", file1);
-        return 0; /** Error case, treat files as equal */
-    }
-    if (lstat(file2, &buf2) < 0) 
-    {
-        perror("stat error for file2");
-        return 0; /** Error case, treat files as equal */
+        /* On error, fall back to alphabetical sorting */
+        return CompareFileNamesAlphabetically(p1, p2);
     }
 
-    /** Compare modification times (st_mtime) */
-    if (buf1.st_mtime > buf2.st_mtime)
-        return -1;  /** Sort in descending order (most recent first) */
-    else if (buf1.st_mtime < buf2.st_mtime)
-        return 1;   /** Sort in descending order */
+    /* Compare the modification times (st_mtime) */
+    if (buf1.st_mtime != buf2.st_mtime)
+        return buf2.st_mtime - buf1.st_mtime;  // Newer files first
+
+    /* If st_mtime is the same, compare nanoseconds (st_mtim.tv_nsec) */
+    else if (buf1.st_mtim.tv_nsec != buf2.st_mtim.tv_nsec)
+        return buf2.st_mtim.tv_nsec - buf1.st_mtim.tv_nsec;
+
+    /* If both times are identical, fall back to alphabetical comparison */
     else
-        return 0;   /** Modification times are the same */
+        return CompareFileNamesAlphabetically(p1, p2);
 }
 
 
 
+
+
 /**
- * Compares two files based on their access times for sorting.
+ * Compares two files based on their access times.
  *
- * This function retrieves the access times of two files and compares them to determine
- * their order. The comparison is done in descending order, meaning more recent access times
- * come first. If there is an error retrieving the file statistics, the function treats the files
- * as equal. This function is used for sorting files based on their access time.
+ * This function is used to sort files by their last access time (st_atime). It retrieves
+ * the access time for each file using the lstat system call. Files that have been accessed
+ * more recently are sorted before those accessed earlier. If the access times are identical,
+ * the files are sorted alphabetically by their names.
  *
- * @param p1: A pointer to the first file name (pointer to a pointer to char). The file name 
- *            is used to retrieve and compare the file's access time.
- * @param p2: A pointer to the second file name (pointer to a pointer to char). The file name 
- *            is used to retrieve and compare the file's access time.
+ * In case of an error while retrieving file statistics (e.g., if a file does not exist),
+ * the function falls back to alphabetical sorting of the file names.
  *
- * @return: A negative value if the first file's access time is greater (more recent).
- *          Zero if the access times are the same.
- *          A positive value if the first file's access time is less (older).
+ * Additionally, if the access times (st_atime) are identical, the function compares the 
+ * nanosecond components (st_atim.tv_nsec) to further determine the order. If both the 
+ * access times and nanoseconds are identical, the files are sorted alphabetically by 
+ * their names as a final fallback.
+ *
+ * @param p1: A pointer to the first file's name to be compared. This is passed as a 
+ *            const void * for compatibility with qsort, but it is treated as a pointer
+ *            to a string (const char **).
+ * @param p2: A pointer to the second file's name to be compared. Similar to p1, it is
+ *            cast to a const char **.
+ *
+ * @return: An integer less than, equal to, or greater than zero if the first file should 
+ *          be sorted before, the same as, or after the second file, respectively:
+ *          - A positive value indicates p1 should come before p2.
+ *          - A negative value indicates p2 should come before p1.
+ *          - Zero indicates the files are equal based on the comparison criteria.
  */
 int CompareFileAccessTimes(const void *p1, const void *p2)
 {
     struct stat buf1, buf2;
-
-    /** Cast the arguments back to pointers to char (file names) */
     const char *file1 = *(const char **) p1;
     const char *file2 = *(const char **) p2;
 
-    /** Get file stats for each file */
-    if (lstat(file1, &buf1) < 0) 
+    /* Attempt to retrieve file statistics for both files */
+    if (lstat(file1, &buf1) < 0 || lstat(file2, &buf2) < 0) 
     {
-        perror("stat error for file1");
-        return 0; /** Error case, treat files as equal */
-    }
-    if (lstat(file2, &buf2) < 0) 
-    {
-        perror("stat error for file2");
-        return 0; /** Error case, treat files as equal */
+        /* On error, fall back to alphabetical sorting */
+        return CompareFileNamesAlphabetically(p1, p2);
     }
 
-    /** Compare access times (st_atime) */
-    if (buf1.st_atime > buf2.st_atime)
-        return -1;  /** Sort in descending order (most recent first) */
-    else if (buf1.st_atime < buf2.st_atime)
-        return 1;   /** Sort in descending order */
+    /* Compare the access times (st_atime) */
+    if (buf1.st_atime != buf2.st_atime)
+        return buf2.st_atime - buf1.st_atime;  // More recently accessed files first
+
+    /* If st_atime is the same, compare nanoseconds (st_atim.tv_nsec) */
+    else if (buf1.st_atim.tv_nsec != buf2.st_atim.tv_nsec)
+        return buf2.st_atim.tv_nsec - buf1.st_atim.tv_nsec;
+
+    /* If both times are identical, fall back to alphabetical comparison */
     else
-        return 0;   /** Access times are the same */
+        return CompareFileNamesAlphabetically(p1, p2);;
 }
+
+
+
 
 
 
 /**
- * Compares two files based on their change times for sorting.
+ * Compares two files based on their change times.
  *
- * This function retrieves the change times of two files and compares them to determine
- * their order. The comparison is done in descending order, meaning more recent change times
- * come first. If there is an error retrieving the file statistics, the function treats the files
- * as equal. This function is used for sorting files based on their change time.
+ * This function is used to sort files by their last change time (st_ctime), which reflects
+ * the last time file metadata or content was changed. It retrieves the change time for each 
+ * file using the lstat system call. Files that have been changed more recently are sorted 
+ * before those changed earlier. If the change times are identical, the files are sorted 
+ * alphabetically by their names.
  *
- * @param p1: A pointer to the first file name (pointer to a pointer to char). The file name 
- *            is used to retrieve and compare the file's change time.
- * @param p2: A pointer to the second file name (pointer to a pointer to char). The file name 
- *            is used to retrieve and compare the file's change time.
+ * In case of an error while retrieving file statistics (e.g., if a file does not exist),
+ * the function falls back to alphabetical sorting of the file names.
  *
- * @return: A negative value if the first file's change time is greater (more recent).
- *          Zero if the change times are the same.
- *          A positive value if the first file's change time is less (older).
+ * Additionally, if the change times (st_ctime) are identical, the function compares the 
+ * nanosecond components (st_ctim.tv_nsec) to further determine the order. If both the 
+ * change times and nanoseconds are identical, the files are sorted alphabetically by 
+ * their names as a final fallback.
+ *
+ * @param p1: A pointer to the first file's name to be compared. This is passed as a 
+ *            const void * for compatibility with qsort, but it is treated as a pointer
+ *            to a string (const char **).
+ * @param p2: A pointer to the second file's name to be compared. Similar to p1, it is
+ *            cast to a const char **.
+ *
+ * @return: An integer less than, equal to, or greater than zero if the first file should 
+ *          be sorted before, the same as, or after the second file, respectively:
+ *          - A positive value indicates p1 should come before p2.
+ *          - A negative value indicates p2 should come before p1.
+ *          - Zero indicates the files are equal based on the comparison criteria.
  */
 int CompareFileChangeTimes(const void *p1, const void *p2)
 {
     struct stat buf1, buf2;
-
-    /** Cast the arguments back to pointers to char (file names) */
     const char *file1 = *(const char **) p1;
     const char *file2 = *(const char **) p2;
 
-    /** Get file stats for each file */
-    if (lstat(file1, &buf1) < 0) 
+    /* Attempt to retrieve file statistics for both files */
+    if (lstat(file1, &buf1) < 0 || lstat(file2, &buf2) < 0) 
     {
-        perror("stat error for file1");
-        return 0; /** Error case, treat files as equal */
-    }
-    if (lstat(file2, &buf2) < 0) 
-    {
-        perror("stat error for file2");
-        return 0; /** Error case, treat files as equal */
+        /* On error, fall back to alphabetical sorting */
+        return CompareFileNamesAlphabetically(p1, p2);
     }
 
-    /** Compare change times (st_ctime) */
-    if (buf1.st_ctime > buf2.st_ctime)
-        return -1;  /** Sort in descending order (most recent first) */
-    else if (buf1.st_ctime < buf2.st_ctime)
-        return 1;   /** Sort in descending order */
+    /* Compare the change times (st_ctime) */
+    if (buf1.st_ctime != buf2.st_ctime)
+        return buf2.st_ctime - buf1.st_ctime;  // More recently changed files first
+
+    /* If st_ctime is the same, compare nanoseconds (st_ctim.tv_nsec) */
+    else if (buf1.st_ctim.tv_nsec != buf2.st_ctim.tv_nsec)
+        return buf2.st_ctim.tv_nsec - buf1.st_ctim.tv_nsec;
+
+    /* If both times are identical, fall back to alphabetical comparison */
     else
-        return 0;   /** Change times are the same */
+        return CompareFileNamesAlphabetically(p1, p2);
 }
-
 
 
 
