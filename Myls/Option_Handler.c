@@ -367,52 +367,52 @@ static void store_file_name(char *file_names[], const char *file_name, int *file
 /**
  * Sorts the files based on the selected command-line options.
  *
- * This function sorts the array of file names based on the user's input options. 
- * Different sorting criteria are applied depending on whether the user has requested
- * sorting by modification time, access time, or change time. If none of the time-based
- * sorting options are selected, the files are sorted alphabetically by name. If the `-f`
- * option is set, sorting is disabled, and the order remains unchanged.
+ * This function sorts the array of file names according to the options specified by the user.
+ * The sorting behavior changes based on whether the user requests sorting by modification 
+ * time (-t), access time (-u), or change time (-c). If none of these options are selected,
+ * the files are sorted alphabetically by name. If the `-f` option is provided, sorting is 
+ * disabled, and the file order remains unchanged.
  *
  *
  * @param file_names: An array of strings containing the names of the files to be sorted.
- *                    The array is modified in place, and the order of the file names 
- *                    will reflect the sorting criteria after the function is executed.
- * @param file_count: The number of files in the `file_names` array. This value determines
- *                    how many entries will be sorted.
+ *                    The array is passed by reference and will be modified in place based
+ *                    on the sorting criteria.
+ * @param file_count: The number of files in the `file_names` array. This value indicates
+ *                    how many entries will be considered for sorting.
  *
- * @return: Void.
+ * @return: Void. 
  */
-static void sort_files(char *file_names[], int file_count) 
+static void sort_files(char *file_names[], int file_count)
 {
-    /* If sorting by modification time is requested (-t option) */
-    if (OptionsFlags[SORT_BY_TIME_OPTION_t]) 
+    /* Default comparison function: Alphabetical sort */
+    int (*compare_func)(const void *, const void *) = CompareFileNamesAlphabetically;
+
+    /* Check if sorting is enabled (if the `-f` option is not set) */
+    if (!OptionsFlags[DISABLE_EVERYTING_OPTION_f]) 
     {
-        /* Sort files by their modification time */
-        qsort(file_names, file_count, sizeof(char *), CompareFileModificationTimes);
-    } 
-    /* If sorting by access time (-u and -t options) */
-    else if (OptionsFlags[ACCESS_TIME_OPTION_u] && OptionsFlags[SORT_BY_TIME_OPTION_t]) 
-    {
-        /* Sort files by their access time */
-        qsort(file_names, file_count, sizeof(char *), CompareFileAccessTimes);
-    } 
-    /* If sorting by change time (-c and -t options) */
-    else if (OptionsFlags[CHANGE_TIME_OPTION_c] && OptionsFlags[SORT_BY_TIME_OPTION_t]) 
-    {
-        /* Sort files by their change time */
-        qsort(file_names, file_count, sizeof(char *), CompareFileChangeTimes);
-    } 
-    /* If no sorting option is provided and the -f option is not set (alphabetical sorting by name) */
-    else if (!OptionsFlags[DISABLE_EVERYTING_OPTION_f]) 
-    {
-        /* Sort files alphabetically by their name */
-        qsort(file_names, file_count, sizeof(char *), CompareFileNamesAlphabetically);
+        /* Sort by time if the `-t` option is set */
+        if (OptionsFlags[SORT_BY_TIME_OPTION_t]) 
+        {
+            /* Sort by access time if the `-u` option is also set */
+            if (OptionsFlags[ACCESS_TIME_OPTION_u]) 
+            {
+                compare_func = CompareFileAccessTimes;
+            }
+            /* Sort by change time if the `-c` option is also set */
+            else if (OptionsFlags[CHANGE_TIME_OPTION_c]) 
+            {
+                compare_func = CompareFileChangeTimes;
+            }            
+            /* Otherwise, sort by modification time (default with `-t`) */
+            else 
+            {
+                compare_func = CompareFileModificationTimes;
+            }
+        }
+        /* Perform the sort using the selected comparison function */
+        qsort(file_names, file_count, sizeof(char *), compare_func);
     }
-
-    /* If the -f option is set, no sorting is applied (skips sorting step) */
 }
-
-
 
 
 
