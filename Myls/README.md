@@ -63,7 +63,7 @@ Replace `[options]` with the desired flags (e.g., `-l`, `-a`), and `[file...]` w
 ![image_2024-09-14_23-42-00](https://github.com/user-attachments/assets/4ea03f6e-cc51-4071-89d0-abf75ac075a1)
 
 ### Show passed directories only(myls -d)
-![image_2024-09-14_23-30-33](https://github.com/user-attachments/assets/99b5b742-70e0-432e-bb25-6265264d0c0d
+![image_2024-09-14_23-30-33](https://github.com/user-attachments/assets/99b1ec66-f99e-49df-b833-6a4ea008d8f4)
 
 ### View each file in a row(myls -1)
 ![image_2024-09-14_23-33-19](https://github.com/user-attachments/assets/96def46a-d9d7-49f1-8606-21c69572c12c)
